@@ -35,12 +35,17 @@ app.get('/excuses', (req, res) => {
 });
 
 app.get('/excuses/:id', (req, res) => {
-  const key = req.query.key;
-  const id = req.params.id;
-  const excuse = excuses[id - 1];
-  res.status(200).json({
-    excuse: excuse
-  });
+  const id = parseInt(req.params.id);
+  const excuse = excuses.find(excuse => excuse.id === id);
+  if (excuse) {
+    res.status(200).json({
+      excuse: excuse
+    });
+  } else {
+    res.status(400).json({
+      error: 'No excuse found'
+    });
+  }
 });
 
 app.post('/excuses', (req, res) => {
@@ -62,20 +67,40 @@ app.post('/excuses', (req, res) => {
 });
 
 app.delete('/excuses/:id', (req, res) => {
-  const id = req.params.id;
-  excuses.splice(id - 1, 1);
-  res.status(200).end();
+  const id = parseInt(req.params.id);
+  const index = excuses.findIndex(excuse => excuse.id === id);
+  if (index !== -1) {
+    excuses.splice(index, 1);
+    res.status(204).end();
+  } else {
+    res.status(400).json({
+      error: `No excuse found with id: ${id}`
+    });
+  }
+  
 });
 
 app.patch('/excuses/:id', (req, res) => {
-  const id = req.params.id;
+  const id = parseInt(req.params.id);
   const description = req.body.description;
-  excuses[id - 1].description = description;
-  res.status(200).json({
-    success: true
-  });
+
+  const index = excuses.findIndex(excuse => excuse.id === id);
+  if (index !== -1 && description) {
+    excuses[index].description = description;
+    res.status(200).json({
+      success: true
+    });
+  } else if (index === -1) {
+    res.status(400).json({
+      error: `No excuse found with id: ${id}`
+    });
+  } else {
+    res.status(400).json({
+      error: `No description provided`
+    });
+  }
 });
 
 app.listen(port, () => {
-  console.log('Server is running on port:', port);
+  console.log(`Server is running on port: ${port}`);
 });
