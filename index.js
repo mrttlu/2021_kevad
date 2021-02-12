@@ -1,8 +1,11 @@
 const express = require('express');
 const app = express();
-
 const port = 3000;
 
+// Middleware for creating req.body
+app.use(express.json());
+
+// Mock database
 const excuses = [
   {
     id: 1,
@@ -22,18 +25,27 @@ const excuses = [
   },
 ];
 
-app.use(express.json());
-
-app.get('/hello', (req, res) => {
-  res.status(200).json({message: 'Hello world!'});
-});
-
+/**
+ * Get all excuses
+ * GET - /excuses
+ * Required values: none
+ * Optional values: none
+ * Success: status 200 - OK and list of excuses
+ */
 app.get('/excuses', (req, res) => {
   res.status(200).json({
     excuses: excuses
   });
 });
 
+/**
+ * Get ecxuse with specified id
+ * GET - /excuses/:id
+ * Required values: id
+ * Optional values: none
+ * Success: status 200 - OK and excuse with specified id
+ * Error: status 400 - Bad Request and error message
+ */
 app.get('/excuses/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const excuse = excuses.find(excuse => excuse.id === id);
@@ -48,6 +60,14 @@ app.get('/excuses/:id', (req, res) => {
   }
 });
 
+/**
+ * Create new excuse
+ * POST - /excuses
+ * Required values: description
+ * Optional values: none
+ * Success: status 201 - Created and id of created excuse
+ * Error: status 400 - Bad Request and error message
+ */
 app.post('/excuses', (req, res) => {
   const description = req.body.description;
   if (description) {
@@ -66,6 +86,14 @@ app.post('/excuses', (req, res) => {
   }
 });
 
+/**
+ * Delete excuse
+ * DELETE - /excuses/:id
+ * Required values: id
+ * Optional values: none
+ * Success: status 204 - No Content
+ * Error: status 400 - Bad Request and error message
+ */
 app.delete('/excuses/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const index = excuses.findIndex(excuse => excuse.id === id);
@@ -79,11 +107,17 @@ app.delete('/excuses/:id', (req, res) => {
   }
   
 });
-
+/**
+ * Update excuse
+ * DELETE - /excuses/:id
+ * Required values: id, description
+ * Optional values: none
+ * Success: status 200 - OK and success message
+ * Error: status 400 - Bad Request and error message
+ */
 app.patch('/excuses/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const description = req.body.description;
-
   const index = excuses.findIndex(excuse => excuse.id === id);
   if (index !== -1 && description) {
     excuses[index].description = description;
@@ -101,6 +135,7 @@ app.patch('/excuses/:id', (req, res) => {
   }
 });
 
+// Start listening
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
