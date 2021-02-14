@@ -191,6 +191,26 @@ const findCategoryById = (id) => {
  * Success: status 200 - OK and list of excuses
  */
 app.get('/excuses', (req, res) => {
+  const categoryId = parseInt(req.query.categoryId);
+  if (categoryId) {
+    const category = findCategoryById(categoryId);
+    if (category) {
+      const excusesInCategory = excuses.filter(excuse => excuse.categoryId === categoryId);
+      if (excusesInCategory) {
+        res.status(200).json({
+          excuses: excusesInCategory
+        });
+      } else {
+        res.status(400).json({
+          error: `No excuse found with categoryId: ${categoryId}`
+        });
+      }
+    } else {
+      res.status(400).json({
+        error: `No excuse found with categoryId: ${categoryId}`
+      });
+    }
+  }
   res.status(200).json({
     excuses: excuses
   });
