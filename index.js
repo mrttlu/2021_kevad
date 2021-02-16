@@ -12,21 +12,29 @@ const excuses = [
     id: 1,
     description: 'Ei tahtnud teha',
     categoryId: 1,
+    createdBy: 1,
+    public: true,
   },
   {
     id: 2,
     description: 'Ei osanud',
     categoryId: 2,
+    createdBy: 1,
+    public: false,
   },
   {
     id: 3,
     description: 'Ei viitsinud',
     categoryId: 3,
+    createdBy: 2,
+    public: true,
   },
   {
     id: 4,
     description: 'Ei teadnud, et oleks vaja midagi teha',
     categoryId: 3,
+    createdBy: 2,
+    public: false,
   },
 ];
 
@@ -45,11 +53,24 @@ const categories = [
   },
 ];
 
+const users = [
+  {
+    id: 1,
+    firstName: 'Juku',
+    lastName: 'Juurikas',
+  },
+  {
+    id: 2,
+    firstName: 'Mati',
+    lastName: 'Maasikas',
+  },
+];
+
 /**
  * Categories related functions
  */
 
-// Find category by id. Returns category or false.
+// Find category by id. Returns category if found or false.
 const findCategoryById = (id) => {
   const category = categories.find((element) => element.id === id);
   if (category) {
@@ -57,6 +78,146 @@ const findCategoryById = (id) => {
   }
   return false;
 };
+
+/**
+ * Users related functions
+ */
+
+// Find user by id. Returns user if found or false.
+const findUserById = (id) => {
+  const user = users.find((element) => element.id === id);
+  if (user) {
+    return user;
+  }
+  return false;
+};
+
+/**
+ * Users API endpoints
+ */
+
+/**
+ * Get all users
+ * GET - /users
+ * Required values: none
+ * Optional values: none
+ * Success: status 200 - OK and list of users
+ */
+app.get('/users', (req, res) => {
+  res.status(200).json({
+    users,
+  });
+});
+
+/**
+ * Get category with specified id
+ * GET - /categories/:id
+ * Required values: id
+ * Optional values: none
+ * Success: status 200 - OK and category with specified id
+ * Error: status 400 - Bad Request and error message
+ */
+app.get('/users/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const user = findUserById(id);
+  if (user) {
+    res.status(200).json({
+      user,
+    });
+  } else {
+    res.status(400).json({
+      error: 'No user found',
+    });
+  }
+});
+
+/**
+ * Create new user
+ * POST - /users
+ * Required values: firstName, lastName
+ * Optional values: none
+ * Success: status 201 - Created and id of created user
+ * Error: status 400 - Bad Request and error message
+ */
+app.post('/users', (req, res) => {
+  const { firstName, lastName } = req.body;
+  if (firstName && lastName) {
+    const user = {
+      id: users.length + 1,
+      firstName,
+      lastName,
+    };
+    users.push(user);
+    res.status(201).json({
+      id: user.id,
+    });
+  } else {
+    res.status(400).json({
+      error: 'Firstname or lastname is missing',
+    });
+  }
+});
+
+/**
+ * Delete user
+ * DELETE - /users/:id
+ * Required values: id
+ * Optional values: none
+ * Success: status 204 - No Content
+ * Error: status 400 - Bad Request and error message
+ */
+app.delete('/users/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  // Check if user exists
+  const user = findUserById(id);
+  if (user) {
+    // Find category index
+    const index = users.findIndex((element) => element.id === id);
+    // Remove user from 'database'
+    users.splice(index, 1);
+    res.status(204).end();
+  } else {
+    res.status(400).json({
+      error: `No user found with id: ${id}`,
+    });
+  }
+});
+
+/**
+ * Update user
+ * PATCH - /categories/:id
+ * Required values: id, firstName OR lastName
+ * Optional values: firstName, lastName
+ * Success: status 200 - OK and success message
+ * Error: status 400 - Bad Request and error message
+ */
+app.patch('/users/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { firstName, lastName } = req.body;
+  if (id && (firstName || lastName)) {
+    const user = findCategoryById(id);
+    if (user) {
+      const index = categories.findIndex((element) => element.id === id);
+      if (firstName) {
+        users[index].firstName = firstName;
+      }
+      if (lastName) {
+        users[index].lastName = lastName;
+      }
+      res.status(200).json({
+        success: true,
+      });
+    } else {
+      res.status(400).json({
+        error: `No user found with id: ${id}`,
+      });
+    }
+  } else {
+    res.status(400).json({
+      error: 'Id, firstName or lastName is missing',
+    });
+  }
+});
 
 /**
  * Categories API endpoints
@@ -150,7 +311,7 @@ app.delete('/categories/:id', (req, res) => {
 
 /**
  * Update category
- * DELETE - /categories/:id
+ * PATCH - /categories/:id
  * Required values: id, description
  * Optional values: none
  * Success: status 200 - OK and success message
@@ -169,7 +330,7 @@ app.patch('/categories/:id', (req, res) => {
       });
     } else {
       res.status(400).json({
-        error: `No excuse found with id: ${id}`,
+        error: `No category found with id: ${id}`,
       });
     }
   } else {
@@ -293,7 +454,7 @@ app.delete('/excuses/:id', (req, res) => {
 
 /**
  * Update excuse
- * DELETE - /excuses/:id
+ * PATCH - /excuses/:id
  * Required values: id, description OR categoryId
  * Optional values: description OR categoryId
  * Success: status 200 - OK and success message
