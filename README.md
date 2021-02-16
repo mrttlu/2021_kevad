@@ -1,6 +1,20 @@
 # Programmeerimine II 2021 kevad - Vabanduste API
 
 ## Endpoindid
+### Kasutajad:
+* GET /users
+  * Tagastab kasutajate nimekirja
+* GET /users/:id
+  * Tagastab kasutaja määratud id-ga
+* POST /users
+  * Loob uue kasutaja
+  * Nõutud firstName ja lastName request body-s
+* PATCH /users/:id
+  * Muudab määratud id-ga kasutaja
+  * Nõutud id parameetrina
+  * Nõutud firstName või lastName request body-s
+* DELETE /users/:id
+  * Kustutab määratud id-ga kasutaja
 ### Kategooriad:
 * GET /categories
   * Tagastab kategooriate nimekirja
@@ -11,6 +25,7 @@
   * Nõutud description request body-s
 * PATCH /categories/:id
   * Muudab määratud id-ga kategooria
+  * Nõutud id parameetrina
   * Nõutud description request body-s
 * DELETE /categories/:id
   * Kustutab määratud id-ga kategooria
@@ -26,6 +41,7 @@
   * Nõutud description ja categoryId request body-s
 * PATCH /excuses/:id
   * Muudab määratud id-ga vabanduse
+  * Nõutud id parameetrina
   * Nõutud description või categoryId request body-s
 * DELETE /excuses/:id
   * Kustutab määratud id-ga vabanduse
