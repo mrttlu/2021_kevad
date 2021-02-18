@@ -105,7 +105,7 @@ const findCommentById = (id) => {
 
 // Find category by id. Returns category if found or false.
 const findCategoryById = (id) => {
-  const category = database.comments.categories.find((element) => element.id === id);
+  const category = database.categories.find((element) => element.id === id);
   if (category) {
     return category;
   }
@@ -139,15 +139,39 @@ const findExcuseById = (id) => {
 };
 
 // Returns excuses with creator
-const getExcusesWithCreator = (array) => {
-  const e = array.map((element) => {
-    const createdBy = database.users.find((user) => user.id === element.createdById);
+const getExcusesWithCreator = (excuses) => {
+  const excusesWithCreator = excuses.map((excuse) => {
+    const createdBy = database.users.find((user) => user.id === excuse.createdById);
     return {
-      ...element,
+      ...excuse,
       createdBy,
     };
   });
-  return e;
+  return excusesWithCreator;
+};
+
+// Returns excuses with comments
+const getExcusesWithComments = (excuses) => {
+  const excusesWithComments = excuses.map((excuse) => {
+    const comments = database.comments.filter((comment) => comment.excuseId === excuse.id);
+    return {
+      ...excuse,
+      comments,
+    };
+  });
+  return excusesWithComments;
+};
+
+// Returns excuses with category
+const getExcusesWithCategory = (excuses) => {
+  const excusesWithCategory = excuses.map((excuse) => {
+    const category = findCategoryById(excuse.categoryId);
+    return {
+      ...excuse,
+      category,
+    };
+  });
+  return excusesWithCategory;
 };
 
 /**
@@ -510,8 +534,11 @@ app.get('/excuses', (req, res) => {
         (element) => element.categoryId === categoryId,
       );
       if (excusesInCategory) {
+        const excusesInCategoryWithCreator = getExcusesWithCreator(excusesInCategory);
+        const excusesWithComments = getExcusesWithComments(excusesInCategoryWithCreator);
+        const excusesWithCategory = getExcusesWithCategory(excusesWithComments);
         res.status(200).json({
-          excuses: excusesInCategory,
+          excuses: excusesWithCategory,
         });
       } else {
         res.status(400).json({
@@ -524,9 +551,11 @@ app.get('/excuses', (req, res) => {
       });
     }
   }
-  const ecusesWithCreator = getExcusesWithCreator(database.excuses);
+  const excusesWithCreator = getExcusesWithCreator(database.excuses);
+  const excusesWithComments = getExcusesWithComments(excusesWithCreator);
+  const excusesWithCategory = getExcusesWithCategory(excusesWithComments);
   res.status(200).json({
-    excuses: ecusesWithCreator,
+    excuses: excusesWithCategory,
   });
 });
 
