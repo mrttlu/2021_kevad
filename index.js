@@ -91,7 +91,7 @@ const users = [
  * Comments related functions
  */
 
-// Find category by id. Returns category if found or false.
+// Find comment by id. Returns comment if found or false.
 const findCommentById = (id) => {
   const comment = comments.find((element) => element.id === id);
   if (comment) {
@@ -124,6 +124,31 @@ const findUserById = (id) => {
     return user;
   }
   return false;
+};
+
+/**
+ * Users related functions
+ */
+
+// Find excuse by id. Returns excuse if found or false.
+const findExcuseById = (id) => {
+  const excuse = excuses.find((element) => element.id === id);
+  if (excuse) {
+    return excuse;
+  }
+  return false;
+};
+
+// Returns excuses with creator
+const excusesWithCreator = (array) => {
+  const e = array.map((element) => {
+    const createdBy = users.find((user) => user.id === element.createdById);
+    return {
+      ...element,
+      createdBy,
+    };
+  });
+  return e;
 };
 
 /**
@@ -474,7 +499,7 @@ app.patch('/categories/:id', (req, res) => {
  * Get all excuses
  * GET - /excuses
  * Required values: none
- * Optional values: none
+ * Optional values: parameter categoryId=:id - returns excuses with category specified by categoryId
  * Success: status 200 - OK and list of excuses
  */
 app.get('/excuses', (req, res) => {
@@ -498,8 +523,9 @@ app.get('/excuses', (req, res) => {
       });
     }
   }
+  const ecusesWCreator = excusesWithCreator(excuses);
   res.status(200).json({
-    excuses,
+    excuses: ecusesWCreator,
   });
 });
 
@@ -513,7 +539,7 @@ app.get('/excuses', (req, res) => {
  */
 app.get('/excuses/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const excuse = excuses.find((element) => element.id === id);
+  const excuse = findExcuseById(id);
   if (excuse) {
     res.status(200).json({
       excuse,
