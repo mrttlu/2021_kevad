@@ -7,85 +7,84 @@ const port = 3000;
 app.use(express.json());
 
 // Mock database
-const comments = [
-  {
-    id: 1,
-    excuseId: 1,
-    createdById: 1,
-    content: 'Suht igav vabandus',
-  },
-  {
-    id: 2,
-    excuseId: 1,
-    createdById: 2,
-    content: 'Kasutan seda vabandust iga päev',
-  },
-  {
-    id: 3,
-    excuseId: 2,
-    createdById: 1,
-    content: 'Matemaatikas väga kasutatav vabandus',
-  },
-];
-
-const excuses = [
-  {
-    id: 1,
-    description: 'Ei tahtnud teha',
-    categoryId: 1,
-    createdById: 1,
-    public: true,
-  },
-  {
-    id: 2,
-    description: 'Ei osanud',
-    categoryId: 2,
-    createdById: 1,
-    public: false,
-  },
-  {
-    id: 3,
-    description: 'Ei viitsinud',
-    categoryId: 3,
-    createdById: 2,
-    public: true,
-  },
-  {
-    id: 4,
-    description: 'Ei teadnud, et oleks vaja midagi teha',
-    categoryId: 3,
-    createdById: 2,
-    public: false,
-  },
-];
-
-const categories = [
-  {
-    id: 1,
-    description: 'Home',
-  },
-  {
-    id: 2,
-    description: 'Work',
-  },
-  {
-    id: 3,
-    description: 'School',
-  },
-];
-
-const users = [
-  {
-    id: 1,
-    firstName: 'Juku',
-    lastName: 'Juurikas',
-  },
-  {
-    id: 2,
-    firstName: 'Mati',
-    lastName: 'Maasikas',
-  },
-];
+const database = {
+  comments: [
+    {
+      id: 1,
+      excuseId: 1,
+      createdById: 1,
+      content: 'Suht igav vabandus',
+    },
+    {
+      id: 2,
+      excuseId: 1,
+      createdById: 2,
+      content: 'Kasutan seda vabandust iga päev',
+    },
+    {
+      id: 3,
+      excuseId: 2,
+      createdById: 1,
+      content: 'Matemaatikas väga kasutatav vabandus',
+    },
+  ],
+  excuses: [
+    {
+      id: 1,
+      description: 'Ei tahtnud teha',
+      categoryId: 1,
+      createdById: 1,
+      public: true,
+    },
+    {
+      id: 2,
+      description: 'Ei osanud',
+      categoryId: 2,
+      createdById: 1,
+      public: false,
+    },
+    {
+      id: 3,
+      description: 'Ei viitsinud',
+      categoryId: 3,
+      createdById: 2,
+      public: true,
+    },
+    {
+      id: 4,
+      description: 'Ei teadnud, et oleks vaja midagi teha',
+      categoryId: 3,
+      createdById: 2,
+      public: false,
+    },
+  ],
+  categories: [
+    {
+      id: 1,
+      description: 'Home',
+    },
+    {
+      id: 2,
+      description: 'Work',
+    },
+    {
+      id: 3,
+      description: 'School',
+    },
+  ],
+  users: [
+    {
+      id: 1,
+      firstName: 'Juku',
+      lastName: 'Juurikas',
+    },
+    {
+      id: 2,
+      firstName: 'Mati',
+      lastName: 'Maasikas',
+    },
+  ],
+};
 
 /**
  * Comments related functions
@@ -93,7 +92,7 @@ const users = [
 
 // Find comment by id. Returns comment if found or false.
 const findCommentById = (id) => {
-  const comment = comments.find((element) => element.id === id);
+  const comment = database.comments.find((element) => element.id === id);
   if (comment) {
     return comment;
   }
@@ -106,7 +105,7 @@ const findCommentById = (id) => {
 
 // Find category by id. Returns category if found or false.
 const findCategoryById = (id) => {
-  const category = categories.find((element) => element.id === id);
+  const category = database.comments.categories.find((element) => element.id === id);
   if (category) {
     return category;
   }
@@ -119,7 +118,7 @@ const findCategoryById = (id) => {
 
 // Find user by id. Returns user if found or false.
 const findUserById = (id) => {
-  const user = users.find((element) => element.id === id);
+  const user = database.users.find((element) => element.id === id);
   if (user) {
     return user;
   }
@@ -132,7 +131,7 @@ const findUserById = (id) => {
 
 // Find excuse by id. Returns excuse if found or false.
 const findExcuseById = (id) => {
-  const excuse = excuses.find((element) => element.id === id);
+  const excuse = database.excuses.find((element) => element.id === id);
   if (excuse) {
     return excuse;
   }
@@ -140,9 +139,9 @@ const findExcuseById = (id) => {
 };
 
 // Returns excuses with creator
-const excusesWithCreator = (array) => {
+const getExcusesWithCreator = (array) => {
   const e = array.map((element) => {
-    const createdBy = users.find((user) => user.id === element.createdById);
+    const createdBy = database.users.find((user) => user.id === element.createdById);
     return {
       ...element,
       createdBy,
@@ -164,7 +163,7 @@ const excusesWithCreator = (array) => {
  */
 app.get('/comments', (req, res) => {
   res.status(200).json({
-    comments,
+    comments: database.comments,
   });
 });
 
@@ -202,12 +201,12 @@ app.post('/comments', (req, res) => {
   const { excuseId, createdById, content } = req.body;
   if (excuseId && createdById && content) {
     const comment = {
-      id: comments.length + 1,
+      id: database.comments.length + 1,
       excuseId,
       createdById,
       content,
     };
-    comments.push(comment);
+    database.comments.push(comment);
     res.status(201).json({
       id: comment.id,
     });
@@ -232,9 +231,9 @@ app.delete('/comments/:id', (req, res) => {
   const comment = findCommentById(id);
   if (comment) {
     // Find comment index
-    const index = comments.findIndex((element) => element.id === id);
+    const index = database.comments.findIndex((element) => element.id === id);
     // Remove comment from 'database'
-    comments.splice(index, 1);
+    database.comments.splice(index, 1);
     res.status(204).end();
   } else {
     res.status(400).json({
@@ -256,7 +255,7 @@ app.delete('/comments/:id', (req, res) => {
  */
 app.get('/users', (req, res) => {
   res.status(200).json({
-    users,
+    users: database.users,
   });
 });
 
@@ -294,11 +293,11 @@ app.post('/users', (req, res) => {
   const { firstName, lastName } = req.body;
   if (firstName && lastName) {
     const user = {
-      id: users.length + 1,
+      id: database.users.length + 1,
       firstName,
       lastName,
     };
-    users.push(user);
+    database.users.push(user);
     res.status(201).json({
       id: user.id,
     });
@@ -323,9 +322,9 @@ app.delete('/users/:id', (req, res) => {
   const user = findUserById(id);
   if (user) {
     // Find category index
-    const index = users.findIndex((element) => element.id === id);
+    const index = database.users.findIndex((element) => element.id === id);
     // Remove user from 'database'
-    users.splice(index, 1);
+    database.users.splice(index, 1);
     res.status(204).end();
   } else {
     res.status(400).json({
@@ -348,12 +347,12 @@ app.patch('/users/:id', (req, res) => {
   if (id && (firstName || lastName)) {
     const user = findCategoryById(id);
     if (user) {
-      const index = categories.findIndex((element) => element.id === id);
+      const index = database.categories.findIndex((element) => element.id === id);
       if (firstName) {
-        users[index].firstName = firstName;
+        database.users[index].firstName = firstName;
       }
       if (lastName) {
-        users[index].lastName = lastName;
+        database.users[index].lastName = lastName;
       }
       res.status(200).json({
         success: true,
@@ -383,7 +382,7 @@ app.patch('/users/:id', (req, res) => {
  */
 app.get('/categories', (req, res) => {
   res.status(200).json({
-    categories,
+    categories: database.categories,
   });
 });
 
@@ -421,10 +420,10 @@ app.post('/categories', (req, res) => {
   const { description } = req.body;
   if (description) {
     const category = {
-      id: categories.length + 1,
+      id: database.categories.length + 1,
       description,
     };
-    categories.push(category);
+    database.categories.push(category);
     res.status(201).json({
       id: category.id,
     });
@@ -449,9 +448,9 @@ app.delete('/categories/:id', (req, res) => {
   const category = findCategoryById(id);
   if (category) {
     // Find category index
-    const index = categories.findIndex((element) => element.id === id);
+    const index = database.categories.findIndex((element) => element.id === id);
     // Remove category from 'database'
-    categories.splice(index, 1);
+    database.categories.splice(index, 1);
     res.status(204).end();
   } else {
     res.status(400).json({
@@ -474,8 +473,8 @@ app.patch('/categories/:id', (req, res) => {
   if (id && description) {
     const category = findCategoryById(id);
     if (category) {
-      const index = categories.findIndex((element) => element.id === id);
-      categories[index].description = description;
+      const index = database.categories.findIndex((element) => element.id === id);
+      database.categories[index].description = description;
       res.status(200).json({
         success: true,
       });
@@ -507,7 +506,9 @@ app.get('/excuses', (req, res) => {
   if (categoryId) {
     const category = findCategoryById(categoryId);
     if (category) {
-      const excusesInCategory = excuses.filter((element) => element.categoryId === categoryId);
+      const excusesInCategory = database.excuses.filter(
+        (element) => element.categoryId === categoryId,
+      );
       if (excusesInCategory) {
         res.status(200).json({
           excuses: excusesInCategory,
@@ -523,9 +524,9 @@ app.get('/excuses', (req, res) => {
       });
     }
   }
-  const ecusesWCreator = excusesWithCreator(excuses);
+  const ecusesWithCreator = getExcusesWithCreator(database.excuses);
   res.status(200).json({
-    excuses: ecusesWCreator,
+    excuses: ecusesWithCreator,
   });
 });
 
@@ -563,11 +564,11 @@ app.post('/excuses', (req, res) => {
   const { description, categoryId } = req.body;
   if (description && categoryId) {
     const excuse = {
-      id: excuses.length + 1,
+      id: database.excuses.length + 1,
       description,
       categoryId,
     };
-    excuses.push(excuse);
+    database.excuses.push(excuse);
     res.status(201).json({
       id: excuse.id,
     });
@@ -593,9 +594,9 @@ app.post('/excuses', (req, res) => {
 app.delete('/excuses/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   // Check if index exists
-  const index = excuses.findIndex((element) => element.id === id);
+  const index = database.excuses.findIndex((element) => element.id === id);
   if (index !== -1) {
-    excuses.splice(index, 1);
+    database.excuses.splice(index, 1);
     res.status(204).end();
   } else {
     res.status(400).json({
@@ -616,13 +617,13 @@ app.patch('/excuses/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { description, categoryId } = req.body.description;
   // Check if excuse exists
-  const index = excuses.findIndex((element) => element.id === id);
+  const index = database.excuses.findIndex((element) => element.id === id);
   if (index !== -1 && (description || categoryId)) {
     if (description) {
-      excuses[index].description = description;
+      database.excuses[index].description = description;
     }
     if (categoryId) {
-      excuses[index].categoryId = categoryId;
+      database.excuses[index].categoryId = categoryId;
     }
     res.status(200).json({
       success: true,
