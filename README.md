@@ -1,7 +1,17 @@
 # Programmeerimine II 2021 kevad - Vabanduste API
 
 ## Endpoindid
-### Kasutajad:
+### Kommentaarid:
+* GET /comments
+  * Tagastab kommentaaride nimekirja
+* GET /comments/:id
+  * Tagastab kommentaari määratud id-ga
+* POST /comments
+  * Loob uue kommentaari
+  * Nõutud ecxuseId, createdById ja content request body-s
+* DELETE /comments/:id
+  * Kustutab määratud id-ga kommentaari
+  ### Kasutajad:
 * GET /users
   * Tagastab kasutajate nimekirja
 * GET /users/:id

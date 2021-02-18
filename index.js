@@ -7,33 +7,54 @@ const port = 3000;
 app.use(express.json());
 
 // Mock database
+const comments = [
+  {
+    id: 1,
+    excuseId: 1,
+    createdById: 1,
+    content: 'Suht igav vabandus',
+  },
+  {
+    id: 2,
+    excuseId: 1,
+    createdById: 2,
+    content: 'Kasutan seda vabandust iga päev',
+  },
+  {
+    id: 3,
+    excuseId: 2,
+    createdById: 1,
+    content: 'Matemaatikas väga kasutatav vabandus',
+  },
+];
+
 const excuses = [
   {
     id: 1,
     description: 'Ei tahtnud teha',
     categoryId: 1,
-    createdBy: 1,
+    createdById: 1,
     public: true,
   },
   {
     id: 2,
     description: 'Ei osanud',
     categoryId: 2,
-    createdBy: 1,
+    createdById: 1,
     public: false,
   },
   {
     id: 3,
     description: 'Ei viitsinud',
     categoryId: 3,
-    createdBy: 2,
+    createdById: 2,
     public: true,
   },
   {
     id: 4,
     description: 'Ei teadnud, et oleks vaja midagi teha',
     categoryId: 3,
-    createdBy: 2,
+    createdById: 2,
     public: false,
   },
 ];
@@ -67,6 +88,19 @@ const users = [
 ];
 
 /**
+ * Comments related functions
+ */
+
+// Find category by id. Returns category if found or false.
+const findCommentById = (id) => {
+  const comment = comments.find((element) => element.id === id);
+  if (comment) {
+    return comment;
+  }
+  return false;
+};
+
+/**
  * Categories related functions
  */
 
@@ -93,6 +127,98 @@ const findUserById = (id) => {
 };
 
 /**
+ * Comments API endpoints
+ */
+
+/**
+ * Get all comments
+ * GET - /comments
+ * Required values: none
+ * Optional values: none
+ * Success: status 200 - OK and list of users
+ */
+app.get('/comments', (req, res) => {
+  res.status(200).json({
+    comments,
+  });
+});
+
+/**
+ * Get comment by comment id
+ * GET - /comments/:id
+ * Required values: id
+ * Optional values: none
+ * Success: status 200 - OK and comment with specified id
+ * Error: status 400 - Bad Request and error message
+ */
+app.get('/comments/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const comment = findCommentById(id);
+  if (comment) {
+    res.status(200).json({
+      comment,
+    });
+  } else {
+    res.status(400).json({
+      error: `No comment found with id: ${id}`,
+    });
+  }
+});
+
+/**
+ * Create new comment
+ * POST - /comments
+ * Required values: excuseId, createdById, content
+ * Optional values: none
+ * Success: status 201 - Created and id of created comment
+ * Error: status 400 - Bad Request and error message
+ */
+app.post('/comments', (req, res) => {
+  const { excuseId, createdById, content } = req.body;
+  if (excuseId && createdById && content) {
+    const comment = {
+      id: comments.length + 1,
+      excuseId,
+      createdById,
+      content,
+    };
+    comments.push(comment);
+    res.status(201).json({
+      id: comment.id,
+    });
+  } else {
+    res.status(400).json({
+      error: 'Excuse id, creator id on content is missing',
+    });
+  }
+});
+
+/**
+ * Delete comment
+ * DELETE - /comments/:id
+ * Required values: id
+ * Optional values: none
+ * Success: status 204 - No Content
+ * Error: status 400 - Bad Request and error message
+ */
+app.delete('/comments/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  // Check if comment exists
+  const comment = findCommentById(id);
+  if (comment) {
+    // Find comment index
+    const index = comments.findIndex((element) => element.id === id);
+    // Remove comment from 'database'
+    comments.splice(index, 1);
+    res.status(204).end();
+  } else {
+    res.status(400).json({
+      error: `No comment found with id: ${id}`,
+    });
+  }
+});
+
+/**
  * Users API endpoints
  */
 
@@ -110,11 +236,11 @@ app.get('/users', (req, res) => {
 });
 
 /**
- * Get category with specified id
- * GET - /categories/:id
+ * Get user by user id
+ * GET - /users/:id
  * Required values: id
  * Optional values: none
- * Success: status 200 - OK and category with specified id
+ * Success: status 200 - OK and user with specified id
  * Error: status 400 - Bad Request and error message
  */
 app.get('/users/:id', (req, res) => {
@@ -126,7 +252,7 @@ app.get('/users/:id', (req, res) => {
     });
   } else {
     res.status(400).json({
-      error: 'No user found',
+      error: `No user found with id: ${id}`,
     });
   }
 });
@@ -237,7 +363,7 @@ app.get('/categories', (req, res) => {
 });
 
 /**
- * Get category with specified id
+ * Get category by specified id
  * GET - /categories/:id
  * Required values: id
  * Optional values: none
@@ -253,7 +379,7 @@ app.get('/categories/:id', (req, res) => {
     });
   } else {
     res.status(400).json({
-      error: 'No category found',
+      error: `No category found with id: ${id}`,
     });
   }
 });
@@ -378,7 +504,7 @@ app.get('/excuses', (req, res) => {
 });
 
 /**
- * Get ecxuse with specified id
+ * Get ecxuse by specified id
  * GET - /excuses/:id
  * Required values: id
  * Optional values: none
