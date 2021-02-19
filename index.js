@@ -359,7 +359,7 @@ app.delete('/users/:id', (req, res) => {
 
 /**
  * Update user
- * PATCH - /categories/:id
+ * PATCH - /users/:id
  * Required values: id, firstName OR lastName
  * Optional values: firstName, lastName
  * Success: status 200 - OK and success message
@@ -369,9 +369,9 @@ app.patch('/users/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { firstName, lastName } = req.body;
   if (id && (firstName || lastName)) {
-    const user = findCategoryById(id);
+    const user = findUserById(id);
     if (user) {
-      const index = database.categories.findIndex((element) => element.id === id);
+      const index = database.users.findIndex((element) => element.id === id);
       if (firstName) {
         database.users[index].firstName = firstName;
       }
