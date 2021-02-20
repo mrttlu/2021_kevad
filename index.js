@@ -1,13 +1,24 @@
 const express = require('express');
 const config = require('./config');
 const database = require('./database');
-const commentsController = require('./api/controllers/commentsController');
+const commentsRoutes = require('./api/routes/commentsRoutes');
+const usersRoutes = require('./api/routes/usersRoutes');
 
 const app = express();
 const { port } = config || 3000;
 
+const logger = (req, res, next) => {
+  console.log(new Date(), req.method, req.url);
+  next();
+};
+
 // Middleware for creating req.body in express app
 app.use(express.json());
+// Routes
+app.use('/comments', commentsRoutes);
+app.use('/users', usersRoutes);
+// Logger middleware
+app.use(logger);
 
 /**
  * Categories related functions
@@ -21,23 +32,6 @@ const findCategoryById = (id) => {
   }
   return false;
 };
-
-/**
- * Users related functions
- */
-
-// Find user by id. Returns user if found or false.
-const findUserById = (id) => {
-  const user = database.users.find((element) => element.id === id);
-  if (user) {
-    return user;
-  }
-  return false;
-};
-
-/**
- * Users related functions
- */
 
 // Find excuse by id. Returns excuse if found or false.
 const findExcuseById = (id) => {
@@ -83,141 +77,6 @@ const getExcusesWithCategory = (excuses) => {
   });
   return excusesWithCategory;
 };
-
-/**
- * Comments API endpoints
- */
-app.get('/comments', commentsController.getComments);
-app.get('/comments/:id', commentsController.getCommentById);
-app.post('/comments', commentsController.createComment);
-app.delete('/comments/:id', commentsController.deleteComment);
-
-/**
- * Users API endpoints
- */
-
-/**
- * Get all users
- * GET - /users
- * Required values: none
- * Optional values: none
- * Success: status 200 - OK and list of users
- */
-app.get('/users', (req, res) => {
-  res.status(200).json({
-    users: database.users,
-  });
-});
-
-/**
- * Get user by user id
- * GET - /users/:id
- * Required values: id
- * Optional values: none
- * Success: status 200 - OK and user with specified id
- * Error: status 400 - Bad Request and error message
- */
-app.get('/users/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const user = findUserById(id);
-  if (user) {
-    res.status(200).json({
-      user,
-    });
-  } else {
-    res.status(400).json({
-      error: `No user found with id: ${id}`,
-    });
-  }
-});
-
-/**
- * Create new user
- * POST - /users
- * Required values: firstName, lastName
- * Optional values: none
- * Success: status 201 - Created and id of created user
- * Error: status 400 - Bad Request and error message
- */
-app.post('/users', (req, res) => {
-  const { firstName, lastName } = req.body;
-  if (firstName && lastName) {
-    const user = {
-      id: database.users.length + 1,
-      firstName,
-      lastName,
-    };
-    database.users.push(user);
-    res.status(201).json({
-      id: user.id,
-    });
-  } else {
-    res.status(400).json({
-      error: 'Firstname or lastname is missing',
-    });
-  }
-});
-
-/**
- * Delete user
- * DELETE - /users/:id
- * Required values: id
- * Optional values: none
- * Success: status 204 - No Content
- * Error: status 400 - Bad Request and error message
- */
-app.delete('/users/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  // Check if user exists
-  const user = findUserById(id);
-  if (user) {
-    // Find category index
-    const index = database.users.findIndex((element) => element.id === id);
-    // Remove user from 'database'
-    database.users.splice(index, 1);
-    res.status(204).end();
-  } else {
-    res.status(400).json({
-      error: `No user found with id: ${id}`,
-    });
-  }
-});
-
-/**
- * Update user
- * PATCH - /users/:id
- * Required values: id, firstName OR lastName
- * Optional values: firstName, lastName
- * Success: status 200 - OK and success message
- * Error: status 400 - Bad Request and error message
- */
-app.patch('/users/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const { firstName, lastName } = req.body;
-  if (id && (firstName || lastName)) {
-    const user = findUserById(id);
-    if (user) {
-      const index = database.users.findIndex((element) => element.id === id);
-      if (firstName) {
-        database.users[index].firstName = firstName;
-      }
-      if (lastName) {
-        database.users[index].lastName = lastName;
-      }
-      res.status(200).json({
-        success: true,
-      });
-    } else {
-      res.status(400).json({
-        error: `No user found with id: ${id}`,
-      });
-    }
-  } else {
-    res.status(400).json({
-      error: 'Id, firstName or lastName is missing',
-    });
-  }
-});
 
 /**
  * Categories API endpoints

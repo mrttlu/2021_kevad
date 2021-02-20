@@ -1,9 +1,5 @@
 const commentsService = require('../services/commentsService');
 
-/**
- * Comments related functions
- */
-
 const commentsController = {};
 
 /**
@@ -11,7 +7,7 @@ const commentsController = {};
  * GET - /comments
  * Required values: none
  * Optional values: none
- * Success: status 200 - OK and list of users
+ * Success: status 200 - OK and list of comments
  */
 commentsController.getComments = (req, res) => {
   const comments = commentsService.getComments();
