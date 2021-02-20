@@ -6,10 +6,10 @@ const router = express.Router();
 /**
  * Categories API endpoints
  */
-router.get('/', categoriesController.getCategories);
-router.get('/:id', categoriesController.getCategoryById);
-router.post('/', categoriesController.createCategory);
-router.patch('/:id', categoriesController.updateCategory);
-router.delete('/:id', categoriesController.deleteCategory);
+router.get('/', categoriesController.getCategories)
+  .get('/:id', categoriesController.getCategoryById)
+  .post('/', categoriesController.createCategory)
+  .patch('/:id', categoriesController.updateCategory)
+  .delete('/:id', categoriesController.deleteCategory);
 
 module.exports = router;

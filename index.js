@@ -11,13 +11,13 @@ const { port } = config || 3000;
 
 // Middleware for creating req.body in express app
 app.use(express.json());
+// Logger middleware
+app.use(logger);
 // Routes
 app.use('/comments', commentsRoutes);
 app.use('/users', usersRoutes);
 app.use('/categories', categoriesRoutes);
 app.use('/excuses', excusesRoutes);
-// Logger middleware
-app.use(logger);
 
 // Start listening
 app.listen(port, () => {

@@ -6,10 +6,10 @@ const router = express.Router();
 /**
  * Categories API endpoints
  */
-router.get('/', excusesController.getExcuses);
-router.get('/:id', excusesController.getExcuseById);
-router.post('/', excusesController.createExcuse);
-router.patch('/:id', excusesController.updateExcuse);
-router.delete('/:id', excusesController.deleteExcuse);
+router.get('/', excusesController.getExcuses)
+  .get('/:id', excusesController.getExcuseById)
+  .post('/', excusesController.createExcuse)
+  .patch('/:id', excusesController.updateExcuse)
+  .delete('/:id', excusesController.deleteExcuse);
 
 module.exports = router;
