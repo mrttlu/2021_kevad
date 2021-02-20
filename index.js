@@ -1,103 +1,13 @@
 const express = require('express');
+const config = require('./config');
+const database = require('./database');
+const commentsController = require('./api/controllers/commentsController');
 
 const app = express();
-const port = 3000;
+const { port } = config || 3000;
 
 // Middleware for creating req.body in express app
 app.use(express.json());
-
-// Mock database
-const database = {
-  comments: [
-    {
-      id: 1,
-      excuseId: 1,
-      createdById: 1,
-      content: 'Suht igav vabandus',
-    },
-    {
-      id: 2,
-      excuseId: 1,
-      createdById: 2,
-      content: 'Kasutan seda vabandust iga päev',
-    },
-    {
-      id: 3,
-      excuseId: 2,
-      createdById: 1,
-      content: 'Matemaatikas väga kasutatav vabandus',
-    },
-  ],
-  excuses: [
-    {
-      id: 1,
-      description: 'Ei tahtnud teha',
-      categoryId: 1,
-      createdById: 1,
-      public: true,
-    },
-    {
-      id: 2,
-      description: 'Ei osanud',
-      categoryId: 2,
-      createdById: 1,
-      public: false,
-    },
-    {
-      id: 3,
-      description: 'Ei viitsinud',
-      categoryId: 3,
-      createdById: 2,
-      public: true,
-    },
-    {
-      id: 4,
-      description: 'Ei teadnud, et oleks vaja midagi teha',
-      categoryId: 3,
-      createdById: 2,
-      public: false,
-    },
-  ],
-  categories: [
-    {
-      id: 1,
-      description: 'Home',
-    },
-    {
-      id: 2,
-      description: 'Work',
-    },
-    {
-      id: 3,
-      description: 'School',
-    },
-  ],
-  users: [
-    {
-      id: 1,
-      firstName: 'Juku',
-      lastName: 'Juurikas',
-    },
-    {
-      id: 2,
-      firstName: 'Mati',
-      lastName: 'Maasikas',
-    },
-  ],
-};
-
-/**
- * Comments related functions
- */
-
-// Find comment by id. Returns comment if found or false.
-const findCommentById = (id) => {
-  const comment = database.comments.find((element) => element.id === id);
-  if (comment) {
-    return comment;
-  }
-  return false;
-};
 
 /**
  * Categories related functions
@@ -177,94 +87,10 @@ const getExcusesWithCategory = (excuses) => {
 /**
  * Comments API endpoints
  */
-
-/**
- * Get all comments
- * GET - /comments
- * Required values: none
- * Optional values: none
- * Success: status 200 - OK and list of users
- */
-app.get('/comments', (req, res) => {
-  res.status(200).json({
-    comments: database.comments,
-  });
-});
-
-/**
- * Get comment by comment id
- * GET - /comments/:id
- * Required values: id
- * Optional values: none
- * Success: status 200 - OK and comment with specified id
- * Error: status 400 - Bad Request and error message
- */
-app.get('/comments/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const comment = findCommentById(id);
-  if (comment) {
-    res.status(200).json({
-      comment,
-    });
-  } else {
-    res.status(400).json({
-      error: `No comment found with id: ${id}`,
-    });
-  }
-});
-
-/**
- * Create new comment
- * POST - /comments
- * Required values: excuseId, createdById, content
- * Optional values: none
- * Success: status 201 - Created and id of created comment
- * Error: status 400 - Bad Request and error message
- */
-app.post('/comments', (req, res) => {
-  const { excuseId, createdById, content } = req.body;
-  if (excuseId && createdById && content) {
-    const comment = {
-      id: database.comments.length + 1,
-      excuseId,
-      createdById,
-      content,
-    };
-    database.comments.push(comment);
-    res.status(201).json({
-      id: comment.id,
-    });
-  } else {
-    res.status(400).json({
-      error: 'Excuse id, creator id on content is missing',
-    });
-  }
-});
-
-/**
- * Delete comment
- * DELETE - /comments/:id
- * Required values: id
- * Optional values: none
- * Success: status 204 - No Content
- * Error: status 400 - Bad Request and error message
- */
-app.delete('/comments/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  // Check if comment exists
-  const comment = findCommentById(id);
-  if (comment) {
-    // Find comment index
-    const index = database.comments.findIndex((element) => element.id === id);
-    // Remove comment from 'database'
-    database.comments.splice(index, 1);
-    res.status(204).end();
-  } else {
-    res.status(400).json({
-      error: `No comment found with id: ${id}`,
-    });
-  }
-});
+app.get('/comments', commentsController.getComments);
+app.get('/comments/:id', commentsController.getCommentById);
+app.post('/comments', commentsController.createComment);
+app.delete('/comments/:id', commentsController.deleteComment);
 
 /**
  * Users API endpoints
