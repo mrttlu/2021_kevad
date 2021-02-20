@@ -3,35 +3,20 @@ const config = require('./config');
 const database = require('./database');
 const commentsRoutes = require('./api/routes/commentsRoutes');
 const usersRoutes = require('./api/routes/usersRoutes');
+const categoriesRoutes = require('./api/routes/categoriesRoutes');
+const logger = require('./api/middlewares/logger');
 
 const app = express();
 const { port } = config || 3000;
-
-const logger = (req, res, next) => {
-  console.log(new Date(), req.method, req.url);
-  next();
-};
 
 // Middleware for creating req.body in express app
 app.use(express.json());
 // Routes
 app.use('/comments', commentsRoutes);
 app.use('/users', usersRoutes);
+app.use('/categories', categoriesRoutes);
 // Logger middleware
 app.use(logger);
-
-/**
- * Categories related functions
- */
-
-// Find category by id. Returns category if found or false.
-const findCategoryById = (id) => {
-  const category = database.categories.find((element) => element.id === id);
-  if (category) {
-    return category;
-  }
-  return false;
-};
 
 // Find excuse by id. Returns excuse if found or false.
 const findExcuseById = (id) => {
@@ -77,127 +62,6 @@ const getExcusesWithCategory = (excuses) => {
   });
   return excusesWithCategory;
 };
-
-/**
- * Categories API endpoints
- */
-
-/**
- * Get all categories
- * GET - /categories
- * Required values: none
- * Optional values: none
- * Success: status 200 - OK and list of categories
- */
-app.get('/categories', (req, res) => {
-  res.status(200).json({
-    categories: database.categories,
-  });
-});
-
-/**
- * Get category by specified id
- * GET - /categories/:id
- * Required values: id
- * Optional values: none
- * Success: status 200 - OK and category with specified id
- * Error: status 400 - Bad Request and error message
- */
-app.get('/categories/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const category = findCategoryById(id);
-  if (category) {
-    res.status(200).json({
-      category,
-    });
-  } else {
-    res.status(400).json({
-      error: `No category found with id: ${id}`,
-    });
-  }
-});
-
-/**
- * Create new category
- * POST - /categories
- * Required values: description
- * Optional values: none
- * Success: status 201 - Created and id of created category
- * Error: status 400 - Bad Request and error message
- */
-app.post('/categories', (req, res) => {
-  const { description } = req.body;
-  if (description) {
-    const category = {
-      id: database.categories.length + 1,
-      description,
-    };
-    database.categories.push(category);
-    res.status(201).json({
-      id: category.id,
-    });
-  } else {
-    res.status(400).json({
-      error: 'Description is missing',
-    });
-  }
-});
-
-/**
- * Delete category
- * DELETE - /categories/:id
- * Required values: id
- * Optional values: none
- * Success: status 204 - No Content
- * Error: status 400 - Bad Request and error message
- */
-app.delete('/categories/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  // Check if category exists
-  const category = findCategoryById(id);
-  if (category) {
-    // Find category index
-    const index = database.categories.findIndex((element) => element.id === id);
-    // Remove category from 'database'
-    database.categories.splice(index, 1);
-    res.status(204).end();
-  } else {
-    res.status(400).json({
-      error: `No category found with id: ${id}`,
-    });
-  }
-});
-
-/**
- * Update category
- * PATCH - /categories/:id
- * Required values: id, description
- * Optional values: none
- * Success: status 200 - OK and success message
- * Error: status 400 - Bad Request and error message
- */
-app.patch('/categories/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const { description } = req.body;
-  if (id && description) {
-    const category = findCategoryById(id);
-    if (category) {
-      const index = database.categories.findIndex((element) => element.id === id);
-      database.categories[index].description = description;
-      res.status(200).json({
-        success: true,
-      });
-    } else {
-      res.status(400).json({
-        error: `No category found with id: ${id}`,
-      });
-    }
-  } else {
-    res.status(400).json({
-      error: 'No description provided',
-    });
-  }
-});
 
 /**
  * Excuses
