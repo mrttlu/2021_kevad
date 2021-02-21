@@ -1,4 +1,4 @@
-const usersService = require('../services/usersService');
+const { usersService } = require('../services');
 
 const usersController = {};
 
@@ -47,20 +47,22 @@ usersController.getUserById = (req, res) => {
  * Error: status 400 - Bad Request and error message
  */
 usersController.createUser = (req, res) => {
-  const { firstName, lastName } = req.body;
+  const { firstName, lastName } = req;
   if (firstName && lastName) {
     const user = {
       firstName,
       lastName,
     };
     const id = usersService.createUser(user);
-    res.status(201).json({
-      id,
-    });
-  } else {
-    res.status(400).json({
-      error: 'Firstname or lastname is missing',
-    });
+    if (id) {
+      res.status(201).json({
+        id,
+      });
+    } else {
+      res.status(500).json({
+        error: 'Something went wrong while creating user.',
+      });
+    }
   }
 };
 

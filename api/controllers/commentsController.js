@@ -1,4 +1,4 @@
-const commentsService = require('../services/commentsService');
+const { commentsService } = require('../services');
 
 const commentsController = {};
 

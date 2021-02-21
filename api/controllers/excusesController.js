@@ -1,5 +1,5 @@
-const excusesService = require('../services/excusesService');
-const categoriesService = require('../services/categoriesService');
+const { excusesService } = require('../services');
+const { categoriesService } = require('../services');
 
 const excusesController = {};
 /**

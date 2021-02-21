@@ -1,10 +1,12 @@
 const express = require('express');
 const config = require('./config');
-const commentsRoutes = require('./api/routes/commentsRoutes');
-const usersRoutes = require('./api/routes/usersRoutes');
-const categoriesRoutes = require('./api/routes/categoriesRoutes');
-const excusesRoutes = require('./api/routes/excusesRoutes');
-const logger = require('./api/middlewares/logger');
+const {
+  categoriesRoutes,
+  commentsRoutes,
+  excusesRoutes,
+  usersRoutes,
+} = require('./api/routes');
+const { logger } = require('./api/middlewares');
 
 const app = express();
 const { port } = config || 3000;
