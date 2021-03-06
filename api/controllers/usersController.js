@@ -41,19 +41,23 @@ usersController.getUserById = (req, res) => {
 /**
  * Create new user
  * POST - /users
- * Required values: firstName, lastName
+ * Required values: firstName, lastName, email, password
  * Optional values: none
  * Success: status 201 - Created and id of created user
  * Error: status 400 - Bad Request and error message
  */
-usersController.createUser = (req, res) => {
-  const { firstName, lastName } = req.body;
-  if (firstName && lastName) {
+usersController.createUser = async (req, res) => {
+  const {
+    firstName, lastName, email, password,
+  } = req.body;
+  if (firstName && lastName && email && password) {
     const user = {
       firstName,
       lastName,
+      email,
+      password,
     };
-    const id = usersService.createUser(user);
+    const id = await usersService.createUser(user);
     if (id) {
       res.status(201).json({
         id,
@@ -63,6 +67,40 @@ usersController.createUser = (req, res) => {
         error: 'Something went wrong while creating user.',
       });
     }
+  }
+};
+
+/**
+ * User login
+ * POST - /users
+ * Required values: email, password
+ * Optional values: none
+ * Success:
+ * Error: status 400 - Bad Request and error message
+ */
+usersController.login = async (req, res) => {
+  const {
+    email, password,
+  } = req.body;
+  if (email && password) {
+    const login = {
+      email,
+      password,
+    };
+    const token = await usersService.login(login);
+    if (token) {
+      res.status(200).json({
+        token,
+      });
+    } else {
+      res.status(403).json({
+        error: 'Wrong email or password',
+      });
+    }
+  } else {
+    res.status(400).json({
+      error: 'Email or password missing',
+    });
   }
 };
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const { commentsController } = require('../controllers');
+const isLoggedIn = require('../middlewares/isLoggedIn');
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const router = express.Router();
 router
   .get('/', commentsController.getComments)
   .get('/:id', commentsController.getCommentById)
-  .post('/', commentsController.createComment)
+  .post('/', isLoggedIn, commentsController.createComment)
   .delete('/:id', commentsController.deleteComment);
 
 module.exports = router;

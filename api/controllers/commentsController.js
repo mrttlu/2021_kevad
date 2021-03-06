@@ -47,7 +47,8 @@ commentsController.getCommentById = (req, res) => {
  * Error: status 400 - Bad Request and error message
  */
 commentsController.createComment = (req, res) => {
-  const { excuseId, createdById, content } = req.body;
+  const { excuseId, content } = req.body;
+  const createdById = req.userId;
   if (excuseId && createdById && content) {
     const comment = {
       excuseId,

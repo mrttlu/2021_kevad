@@ -1,4 +1,7 @@
+const bcrypt = require('bcrypt');
 const database = require('../../database');
+const jwtService = require('./jwtService');
+const { saltRounds } = require('../../config');
 
 const usersService = {};
 
@@ -18,11 +21,16 @@ usersService.getUserById = (id) => {
 };
 
 // Creates new user, returns id on new user
-usersService.createUser = (newUser) => {
+usersService.createUser = async (newUser) => {
   const id = database.users.length + 1;
+  const hash = await bcrypt.hash(newUser.password, saltRounds);
   const user = {
     id,
-    ...newUser,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    email: newUser.email,
+    password: hash,
+    role: 'User',
   };
   database.users.push(user);
   return id;
@@ -47,6 +55,26 @@ usersService.updateUser = (user) => {
     database.users[index].lastName = user.lastName;
   }
   return true;
+};
+
+usersService.getUserByEmail = (email) => {
+  const user = database.users.find((element) => element.email === email);
+  if (user) return user;
+  return false;
+};
+
+// User login
+usersService.login = async (login) => {
+  const { email, password } = login;
+  const user = usersService.getUserByEmail(email);
+  if (user) {
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      const token = await jwtService.sign(user);
+      return token;
+    }
+  }
+  return false;
 };
 
 module.exports = usersService;

@@ -54,6 +54,7 @@ const database = {
     {
       id: 1,
       description: 'Home',
+      createdById: 1,
     },
     {
       id: 2,
@@ -69,11 +70,25 @@ const database = {
       id: 1,
       firstName: 'Juku',
       lastName: 'Juurikas',
+      email: 'juku@juurikas.ee',
+      password: 'juku',
+      role: 'User',
     },
     {
       id: 2,
       firstName: 'Mati',
       lastName: 'Maasikas',
+      email: 'mati@maasikas.ee',
+      password: 'mati',
+      role: 'Admin',
+    },
+    {
+      id: 3,
+      firstName: 'Martti',
+      lastName: 'Raavel',
+      email: 'mrt@mrt.ee',
+      password: '$2b$10$Dv7y5133dUL.DTiogU1bXeODhoEpuE.AsiiCdUmvQJwKHU57YISyW',
+      role: 'User',
     },
   ],
 };

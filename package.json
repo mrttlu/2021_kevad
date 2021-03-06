@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/mrttlu/2021_kevad#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "eslint": "^7.20.0",
