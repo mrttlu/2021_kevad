@@ -47,7 +47,7 @@ usersController.getUserById = (req, res) => {
  * Error: status 400 - Bad Request and error message
  */
 usersController.createUser = (req, res) => {
-  const { firstName, lastName } = req;
+  const { firstName, lastName } = req.body;
   if (firstName && lastName) {
     const user = {
       firstName,
