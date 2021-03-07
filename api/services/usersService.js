@@ -1,7 +1,6 @@
-const bcrypt = require('bcrypt');
 const database = require('../../database');
 const jwtService = require('./jwtService');
-const { saltRounds } = require('../../config');
+const hashService = require('./hashService');
 
 const usersService = {};
 
@@ -25,7 +24,7 @@ usersService.createUser = async (newUser) => {
     return { error: 'User already exists' };
   }
   const id = database.users.length + 1;
-  const hash = await bcrypt.hash(newUser.password, saltRounds);
+  const hash = await hashService.hash(newUser.password);
   const user = {
     id,
     firstName: newUser.firstName,
@@ -48,13 +47,20 @@ usersService.deleteUser = (id) => {
 };
 
 // Updates user
-usersService.updateUser = (user) => {
+usersService.updateUser = async (user) => {
   const index = database.users.findIndex((element) => element.id === user.id);
   if (user.firstName) {
     database.users[index].firstName = user.firstName;
   }
   if (user.lastName) {
     database.users[index].lastName = user.lastName;
+  }
+  if (user.email) {
+    database.users[index].email = user.email;
+  }
+  if (user.password) {
+    const hash = await hashService.hash(user.password);
+    database.users[index].password = hash;
   }
   return true;
 };
@@ -70,7 +76,7 @@ usersService.login = async (login) => {
   const { email, password } = login;
   const user = usersService.getUserByEmail(email);
   if (!user) return { error: 'No user found' };
-  const match = await bcrypt.compare(password, user.password);
+  const match = await hashService.compare(password, user.password);
   if (!match) return { error: 'Wrong password' };
   const token = await jwtService.sign(user);
   return { token };

@@ -112,6 +112,7 @@ usersController.login = async (req, res) => {
  * Optional values: none
  * Success: status 204 - No Content
  * Error: status 400 - Bad Request and error message
+ * Error: status 500 - Server error and error message
  */
 usersController.deleteUser = (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -138,11 +139,17 @@ usersController.deleteUser = (req, res) => {
  * Optional values: firstName, lastName
  * Success: status 200 - OK and success message
  * Error: status 400 - Bad Request and error message
+ * Error: status 500 - Server error and error message
  */
-usersController.updateUser = (req, res) => {
+usersController.updateUser = async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const { firstName, lastName } = req.body;
-  if (!id && !(firstName || lastName)) {
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+  } = req.body;
+  if (!id && !(firstName || lastName || email || password)) {
     res.status(400).json({
       error: 'Id, firstName or lastName is missing',
     });
@@ -157,8 +164,10 @@ usersController.updateUser = (req, res) => {
     id,
     firstName,
     lastName,
+    email,
+    password,
   };
-  const success = usersService.updateUser(userToUpdate);
+  const success = await usersService.updateUser(userToUpdate);
   if (!success) {
     return res.status(500).json({
       error: 'Something went wrong while updating user',

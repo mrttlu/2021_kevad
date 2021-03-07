@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 const logger = (req, res, next) => {
   console.log(new Date(), req.method, req.url);
-  next();
+  return next();
 };
 
 module.exports = logger;

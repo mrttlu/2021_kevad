@@ -3,6 +3,7 @@ const commentsService = require('./commentsService');
 const excusesService = require('./excusesService');
 const usersService = require('./usersService');
 const jwtService = require('./jwtService');
+const hashService = require('./hashService');
 
 module.exports = {
   categoriesService,
@@ -10,4 +11,5 @@ module.exports = {
   excusesService,
   usersService,
   jwtService,
+  hashService,
 };
