@@ -15,38 +15,40 @@ const excusesController = {};
  */
 excusesController.getExcuses = (req, res) => {
   const categoryId = parseInt(req.query.categoryId, 10);
+  // If category id is provided, search for excuses in category
   if (categoryId) {
     const category = categoriesService.getCategoryById(categoryId);
-    if (category) {
-      const excusesInCategory = excusesService.getExcusesInCategory(categoryId);
-      if (excusesInCategory) {
-        const excusesInCategoryWithCreator = excusesService
-          .getExcusesWithCreator(excusesInCategory);
-        const excusesWithComments = excusesService
-          .getExcusesWithComments(excusesInCategoryWithCreator);
-        const excusesWithCategory = excusesService
-          .getExcusesWithCategory(excusesWithComments);
-        res.status(200).json({
-          excuses: excusesWithCategory,
-        });
-      } else {
-        res.status(400).json({
-          error: `No excuse found with categoryId: ${categoryId}`,
-        });
-      }
-    } else {
-      res.status(400).json({
+    if (!category) {
+      return res.status(400).json({
+        error: `No category found with id: ${categoryId}`,
+      });
+    }
+    // If category exists
+    const excusesInCategory = excusesService.getExcusesInCategory(categoryId);
+    if (!excusesInCategory) {
+      return res.status(400).json({
         error: `No excuse found with categoryId: ${categoryId}`,
       });
     }
+    // If excuses exists in category
+    const excusesInCategoryWithCreator = excusesService
+      .getExcusesWithCreator(excusesInCategory);
+    const excusesWithComments = excusesService
+      .getExcusesWithComments(excusesInCategoryWithCreator);
+    const excusesWithCategory = excusesService
+      .getExcusesWithCategory(excusesWithComments);
+    return res.status(200).json({
+      excuses: excusesWithCategory,
+    });
   }
+  // If no category id provided, search for all excuses
   const excusesWithCreator = excusesService
     .getExcusesWithCreator(excusesService.getExcuses());
   const excusesWithComments = excusesService
     .getExcusesWithComments(excusesWithCreator);
   const excusesWithCategory = excusesService
     .getExcusesWithCategory(excusesWithComments);
-  res.status(200).json({
+  return res.status(200).json({
     excuses: excusesWithCategory,
   });
 };
@@ -62,15 +64,14 @@ excusesController.getExcuses = (req, res) => {
 excusesController.getExcuseById = (req, res) => {
   const id = parseInt(req.params.id, 10);
   const excuse = excusesService.getExcuseById(id);
-  if (excuse) {
-    res.status(200).json({
-      excuse,
-    });
-  } else {
-    res.status(400).json({
+  if (!excuse) {
+    return res.status(400).json({
       error: 'No excuse found',
     });
   }
+  return res.status(200).json({
+    excuse,
+  });
 };
 
 /**
@@ -83,30 +84,26 @@ excusesController.getExcuseById = (req, res) => {
  */
 excusesController.createExcuse = (req, res) => {
   const { description, categoryId } = req.body;
-  if (description && categoryId) {
-    const excuse = {
-      description,
-      categoryId,
-    };
-    const id = excusesService.createExcuse(excuse);
-    if (id) {
-      res.status(201).json({
-        id: excuse.id,
-      });
-    } else {
-      res.status(500).json({
-        error: 'Something went wrong while updating excuse',
-      });
-    }
-  } else if (!description) {
-    res.status(400).json({
-      error: 'Description is missing',
-    });
-  } else if (!categoryId) {
-    res.status(400).json({
-      error: 'Category id is missing',
+  const createdById = req.userId;
+  if (!description || !categoryId) {
+    return res.status(400).json({
+      error: 'Description or categoryId is missing',
     });
   }
+  const excuse = {
+    description,
+    categoryId,
+    createdById,
+  };
+  const id = excusesService.createExcuse(excuse);
+  if (!id) {
+    return res.status(500).json({
+      error: 'Something went wrong while updating excuse',
+    });
+  }
+  return res.status(201).json({
+    id: excuse.id,
+  });
 };
 
 /**
@@ -119,21 +116,26 @@ excusesController.createExcuse = (req, res) => {
  */
 excusesController.deleteExcuse = (req, res) => {
   const id = parseInt(req.params.id, 10);
+  const createdById = req.userId;
+  const isAdmin = req.userRole === 'Admin';
   const excuse = excusesService.getExcuseById(id);
-  if (excuse) {
-    const success = excusesService.deleteExcuse(id);
-    if (success) {
-      res.status(204).end();
-    } else {
-      res.status(500).json({
-        error: 'Something went wrong while deleting excuse',
-      });
-    }
-  } else {
-    res.status(400).json({
+  if (!excuse) {
+    return res.status(400).json({
       error: `No excuse found with id: ${id}`,
     });
   }
+  if (!(excuse.createdById === createdById || isAdmin)) {
+    return res.status(403).json({
+      error: 'You have no rights to delete this excuse',
+    });
+  }
+  const success = excusesService.deleteExcuse(id);
+  if (!success) {
+    return res.status(500).json({
+      error: 'Something went wrong while deleting excuse',
+    });
+  }
+  return res.status(204).end();
 };
 
 /**
@@ -147,35 +149,39 @@ excusesController.deleteExcuse = (req, res) => {
 excusesController.updateExcuse = (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { description, categoryId } = req.body;
-  if (id && (description || categoryId)) {
-    // Check if excuse exists
-    const excuse = excusesService.getExcuseById(id);
-    if (excuse) {
-      const excuseToUpdate = {
-        id,
-        description,
-        categoryId,
-      };
-      const success = excusesService.updateExcuse(excuseToUpdate);
-      if (success) {
-        res.status(200).json({
-          success: true,
-        });
-      } else {
-        res.status(500).json({
-          error: 'Something went wrong while updating excuse',
-        });
-      }
-    } else {
-      res.status(400).json({
-        error: `No excuse found with id: ${id}`,
-      });
-    }
-  } else {
+  const createdById = req.userId;
+  const isAdmin = req.userRole === 'Admin';
+  // Check if excuse exists
+  const excuse = excusesService.getExcuseById(id);
+  if (!excuse) {
     res.status(400).json({
+      error: `No excuse found with id: ${id}`,
+    });
+  }
+  if (!(excuse.createdById === createdById || isAdmin)) {
+    return res.status(403).json({
+      error: 'You have no rights to update this excuse',
+    });
+  }
+  if (!(description || categoryId)) {
+    return res.status(400).json({
       error: 'No required data provided',
     });
   }
+  const excuseToUpdate = {
+    id,
+    description,
+    categoryId,
+  };
+  const success = excusesService.updateExcuse(excuseToUpdate);
+  if (!success) {
+    return res.status(500).json({
+      error: 'Something went wrong while updating excuse',
+    });
+  }
+  return res.status(200).json({
+    success,
+  });
 };
 
 module.exports = excusesController;
