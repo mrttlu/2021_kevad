@@ -59,10 +59,12 @@ const database = {
     {
       id: 2,
       description: 'Work',
+      createdById: 2,
     },
     {
       id: 3,
       description: 'School',
+      createdById: 3,
     },
   ],
   users: [

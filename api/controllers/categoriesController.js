@@ -48,25 +48,25 @@ categoriesController.getCategoryById = (req, res) => {
  */
 categoriesController.createCategory = (req, res) => {
   const { description } = req.body;
-  if (description) {
-    const category = {
-      description,
-    };
-    const id = categoriesService.createCategory(category);
-    if (id) {
-      res.status(201).json({
-        id,
-      });
-    } else {
-      res.status(500).json({
-        error: 'Something went wrong while creating category',
-      });
-    }
-  } else {
-    res.status(400).json({
+  const createdById = req.userId;
+  if (!description) {
+    return res.status(400).json({
       error: 'Description is missing',
     });
   }
+  const category = {
+    description,
+    createdById,
+  };
+  const id = categoriesService.createCategory(category);
+  if (!id) {
+    return res.status(500).json({
+      error: 'Something went wrong while creating category',
+    });
+  }
+  return res.status(201).json({
+    id,
+  });
 };
 
 /**
@@ -81,20 +81,18 @@ categoriesController.deleteCategory = (req, res) => {
   const id = parseInt(req.params.id, 10);
   // Check if category exists
   const category = categoriesService.getCategoryById(id);
-  if (category) {
-    const success = categoriesService.deleteCategory(id);
-    if (success) {
-      res.status(204).end();
-    } else {
-      res.status(500).json({
-        error: 'Something went wrong while deleting category',
-      });
-    }
-  } else {
-    res.status(400).json({
+  if (!category) {
+    return res.status(400).json({
       error: `No category found with id: ${id}`,
     });
   }
+  const success = categoriesService.deleteCategory(id);
+  if (!success) {
+    res.status(500).json({
+      error: 'Something went wrong while deleting category',
+    });
+  }
+  return res.status(204).end();
 };
 
 /**
@@ -108,33 +106,30 @@ categoriesController.deleteCategory = (req, res) => {
 categoriesController.updateCategory = (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { description } = req.body;
-  if (id && description) {
-    const category = categoriesService.getCategoryById(id);
-    if (category) {
-      const categoryToUpdate = {
-        id,
-        description,
-      };
-      const success = categoriesService.updateCategory(categoryToUpdate);
-      if (success) {
-        res.status(200).json({
-          success: true,
-        });
-      } else {
-        res.status(500).json({
-          error: 'Something went wrong while updating category',
-        });
-      }
-    } else {
-      res.status(400).json({
-        error: `No category found with id: ${id}`,
-      });
-    }
-  } else {
-    res.status(400).json({
+  if (!description) {
+    return res.status(400).json({
       error: 'No description provided',
     });
   }
+  const category = categoriesService.getCategoryById(id);
+  if (!category) {
+    return res.status(400).json({
+      error: `No category found with id: ${id}`,
+    });
+  }
+  const categoryToUpdate = {
+    id,
+    description,
+  };
+  const success = categoriesService.updateCategory(categoryToUpdate);
+  if (!success) {
+    return res.status(500).json({
+      error: 'Something went wrong while updating category',
+    });
+  }
+  return res.status(200).json({
+    success: true,
+  });
 };
 
 module.exports = categoriesController;
