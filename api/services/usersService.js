@@ -14,14 +14,16 @@ usersService.getUsers = () => {
 // Find user by id. Returns user if found or false.
 usersService.getUserById = (id) => {
   const user = database.users.find((element) => element.id === id);
-  if (user) {
-    return user;
-  }
-  return false;
+  if (!user) return false;
+  return user;
 };
 
 // Creates new user, returns id on new user
 usersService.createUser = async (newUser) => {
+  const existingUser = usersService.getUserByEmail(newUser.email);
+  if (existingUser) {
+    return { error: 'User already exists' };
+  }
   const id = database.users.length + 1;
   const hash = await bcrypt.hash(newUser.password, saltRounds);
   const user = {
@@ -33,7 +35,7 @@ usersService.createUser = async (newUser) => {
     role: 'User',
   };
   database.users.push(user);
-  return id;
+  return { id };
 };
 
 // Deletes user
@@ -57,24 +59,21 @@ usersService.updateUser = (user) => {
   return true;
 };
 
+// Find user by email. Returns user if found or undefined
 usersService.getUserByEmail = (email) => {
   const user = database.users.find((element) => element.email === email);
-  if (user) return user;
-  return false;
+  return user;
 };
 
 // User login
 usersService.login = async (login) => {
   const { email, password } = login;
   const user = usersService.getUserByEmail(email);
-  if (user) {
-    const match = await bcrypt.compare(password, user.password);
-    if (match) {
-      const token = await jwtService.sign(user);
-      return token;
-    }
-  }
-  return false;
+  if (!user) return { error: 'No user found' };
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return { error: 'Wrong password' };
+  const token = await jwtService.sign(user);
+  return { token };
 };
 
 module.exports = usersService;

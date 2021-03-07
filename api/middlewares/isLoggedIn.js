@@ -1,4 +1,4 @@
-const jwtService = require('../services/jwtService');
+const { jwtService } = require('../services');
 
 const isLoggedIn = async (req, res, next) => {
   if (!req.headers.authorization) {
@@ -15,7 +15,7 @@ const isLoggedIn = async (req, res, next) => {
   }
   req.userId = payload.id;
   req.userRole = payload.role;
-  next();
+  return next();
 };
 
 module.exports = isLoggedIn;
