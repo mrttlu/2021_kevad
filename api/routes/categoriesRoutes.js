@@ -1,6 +1,6 @@
 const express = require('express');
 const { categoriesController } = require('../controllers');
-const { isLoggedIn } = require('../middlewares');
+const { isLoggedIn, isAdmin } = require('../middlewares');
 
 const router = express.Router();
 
@@ -8,10 +8,11 @@ const router = express.Router();
  * Categories API endpoints
  */
 router
+  .use(isLoggedIn)
   .get('/', categoriesController.getCategories)
   .get('/:id', categoriesController.getCategoryById)
-  .post('/', isLoggedIn, categoriesController.createCategory)
-  .patch('/:id', isLoggedIn, categoriesController.updateCategory)
-  .delete('/:id', isLoggedIn, categoriesController.deleteCategory);
+  .post('/', categoriesController.createCategory)
+  .patch('/:id', categoriesController.updateCategory)
+  .delete('/:id', isAdmin, categoriesController.deleteCategory);
 
 module.exports = router;

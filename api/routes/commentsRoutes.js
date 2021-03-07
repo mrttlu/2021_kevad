@@ -8,9 +8,10 @@ const router = express.Router();
  * Comments API endpoints
  */
 router
-  .get('/', isLoggedIn, commentsController.getComments)
-  .get('/:id', isLoggedIn, commentsController.getCommentById)
-  .post('/', isLoggedIn, commentsController.createComment)
-  .delete('/:id', isLoggedIn, commentsController.deleteComment);
+  .use(isLoggedIn)
+  .get('/', commentsController.getComments)
+  .get('/:id', commentsController.getCommentById)
+  .post('/', commentsController.createComment)
+  .delete('/:id', commentsController.deleteComment);
 
 module.exports = router;

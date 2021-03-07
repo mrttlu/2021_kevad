@@ -8,10 +8,11 @@ const router = express.Router();
  * Categories API endpoints
  */
 router
+  .use(isLoggedIn)
   .get('/', excusesController.getExcuses)
   .get('/:id', excusesController.getExcuseById)
-  .post('/', isLoggedIn, excusesController.createExcuse)
-  .patch('/:id', isLoggedIn, excusesController.updateExcuse)
-  .delete('/:id', isLoggedIn, excusesController.deleteExcuse);
+  .post('/', excusesController.createExcuse)
+  .patch('/:id', excusesController.updateExcuse)
+  .delete('/:id', excusesController.deleteExcuse);
 
 module.exports = router;
