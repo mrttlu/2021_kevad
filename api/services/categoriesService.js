@@ -11,10 +11,8 @@ categoriesService.getCategories = () => {
 // Find category by id. Returns category if found or false.
 categoriesService.getCategoryById = (id) => {
   const category = database.categories.find((element) => element.id === id);
-  if (category) {
-    return category;
-  }
-  return false;
+  if (!category) return false;
+  return category;
 };
 
 // Creates new category
@@ -41,9 +39,8 @@ categoriesService.deleteCategory = (id) => {
 categoriesService.updateCategory = (category) => {
   // Find category index
   const index = database.categories.findIndex((element) => element.id === category.id);
-  if (category.description) {
-    database.categories[index].description = category.description;
-  }
+  if (!category.description) return false;
+  database.categories[index].description = category.description;
   return true;
 };
 
