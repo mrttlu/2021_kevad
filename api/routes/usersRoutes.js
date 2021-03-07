@@ -2,9 +2,7 @@ const express = require('express');
 const { usersController } = require('../controllers');
 
 const router = express.Router();
-const { validators } = require('../middlewares');
-const isLoggedIn = require('../middlewares/isLoggedIn');
-const isAdmin = require('../middlewares/isAdmin');
+const { validators, isLoggedIn, isAdmin } = require('../middlewares');
 
 /**
  * Users API endpoints
@@ -14,7 +12,7 @@ router
   .get('/:id', isLoggedIn, validators.getUserById, usersController.getUserById)
   .post('/', usersController.createUser)
   .post('/login', usersController.login)
-  .patch('/:id', usersController.updateUser)
-  .delete('/:id', usersController.deleteUser);
+  .patch('/:id', isLoggedIn, usersController.updateUser)
+  .delete('/:id', isLoggedIn, usersController.deleteUser);
 
 module.exports = router;

@@ -88,7 +88,7 @@ const database = {
       lastName: 'Raavel',
       email: 'mrt@mrt.ee',
       password: '$2b$10$Dv7y5133dUL.DTiogU1bXeODhoEpuE.AsiiCdUmvQJwKHU57YISyW',
-      role: 'Admin',
+      role: 'User',
     },
   ],
 };

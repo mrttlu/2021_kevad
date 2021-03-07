@@ -1,5 +1,6 @@
 const express = require('express');
 const { excusesController } = require('../controllers');
+const { isLoggedIn } = require('../middlewares');
 
 const router = express.Router();
 
@@ -9,8 +10,8 @@ const router = express.Router();
 router
   .get('/', excusesController.getExcuses)
   .get('/:id', excusesController.getExcuseById)
-  .post('/', excusesController.createExcuse)
-  .patch('/:id', excusesController.updateExcuse)
-  .delete('/:id', excusesController.deleteExcuse);
+  .post('/', isLoggedIn, excusesController.createExcuse)
+  .patch('/:id', isLoggedIn, excusesController.updateExcuse)
+  .delete('/:id', isLoggedIn, excusesController.deleteExcuse);
 
 module.exports = router;

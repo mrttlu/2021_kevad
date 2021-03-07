@@ -3,8 +3,14 @@ const database = require('../../database');
 const commentsService = {};
 
 // Returns all comments
-commentsService.getComments = () => {
+commentsService.getAllComments = () => {
   const { comments } = database;
+  return comments;
+};
+
+// Returns users comments
+commentsService.getUserComments = (userId) => {
+  const comments = database.comments.filter((element) => element.createdById === userId);
   return comments;
 };
 
