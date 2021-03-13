@@ -118,7 +118,7 @@ usersController.deleteUser = (req, res) => {
   const id = parseInt(req.params.id, 10);
   // Check if user exists
   const user = usersService.getUserById(id);
-  if (user) {
+  if (!user) {
     return res.status(400).json({
       error: `No user found with id: ${id}`,
     });
