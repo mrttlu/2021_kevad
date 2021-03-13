@@ -13,10 +13,10 @@ excusesService.getExcuses = () => {
 // Find excuse by id. Returns excuse if found or false.
 excusesService.getExcuseById = (id) => {
   const excuse = database.excuses.find((element) => element.id === id);
-  if (excuse) {
-    return excuse;
+  if (!excuse) {
+    return false;
   }
-  return false;
+  return excuse;
 };
 
 // Returns excuses with creator

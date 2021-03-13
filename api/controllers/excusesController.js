@@ -16,36 +16,36 @@ const excusesController = {};
 excusesController.getExcuses = (req, res) => {
   const categoryId = parseInt(req.query.categoryId, 10);
   // If category id is provided, search for excuses in category
-  if (categoryId) {
-    const category = categoriesService.getCategoryById(categoryId);
-    if (!category) {
-      return res.status(400).json({
-        error: `No category found with id: ${categoryId}`,
-      });
-    }
-    // If category exists
-    const excusesInCategory = excusesService.getExcusesInCategory(categoryId);
-    if (!excusesInCategory) {
-      return res.status(400).json({
-        error: `No excuse found with categoryId: ${categoryId}`,
-      });
-    }
-    // If excuses exists in category
-    const excusesInCategoryWithCreator = excusesService
-      .getExcusesWithCreator(excusesInCategory);
+  if (!categoryId) {
+    // If no category id provided, search for all excuses
+    const excusesWithCreator = excusesService
+      .getExcusesWithCreator(excusesService.getExcuses());
     const excusesWithComments = excusesService
-      .getExcusesWithComments(excusesInCategoryWithCreator);
+      .getExcusesWithComments(excusesWithCreator);
     const excusesWithCategory = excusesService
       .getExcusesWithCategory(excusesWithComments);
     return res.status(200).json({
       excuses: excusesWithCategory,
     });
   }
-  // If no category id provided, search for all excuses
-  const excusesWithCreator = excusesService
-    .getExcusesWithCreator(excusesService.getExcuses());
+  const category = categoriesService.getCategoryById(categoryId);
+  if (!category) {
+    return res.status(400).json({
+      error: `No category found with id: ${categoryId}`,
+    });
+  }
+  // If category exists
+  const excusesInCategory = excusesService.getExcusesInCategory(categoryId);
+  if (!excusesInCategory) {
+    return res.status(400).json({
+      error: `No excuse found with categoryId: ${categoryId}`,
+    });
+  }
+  // If excuses exists in category
+  const excusesInCategoryWithCreator = excusesService
+    .getExcusesWithCreator(excusesInCategory);
   const excusesWithComments = excusesService
-    .getExcusesWithComments(excusesWithCreator);
+    .getExcusesWithComments(excusesInCategoryWithCreator);
   const excusesWithCategory = excusesService
     .getExcusesWithCategory(excusesWithComments);
   return res.status(200).json({
