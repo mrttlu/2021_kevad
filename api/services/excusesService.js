@@ -6,11 +6,13 @@ const excusesService = {};
 excusesService.getExcuses = async () => {
   const excuses = await db.query(
     `SELECT
-      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email
+      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS category
     FROM
       excuses E
     INNER JOIN
       users U ON E.createdById = U.id
+    INNER JOIN
+      categories C ON E.categoryId = C.id
     WHERE
       E.deleted = 0`,
   );
@@ -21,11 +23,13 @@ excusesService.getExcuses = async () => {
 excusesService.getExcusesInCategory = async (categoryId) => {
   const excuses = await db.query(
     `SELECT
-      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email
+    E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS category
     FROM
       excuses E
     INNER JOIN
       users U ON E.createdById = U.id
+    INNER JOIN
+      categories C ON E.categoryId = C.id
     WHERE
       E.deleted = 0 AND categoryId = ?`, [categoryId],
   );
@@ -36,11 +40,13 @@ excusesService.getExcusesInCategory = async (categoryId) => {
 excusesService.getExcuseById = async (id) => {
   const excuse = await db.query(
     `SELECT
-      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email
+    E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS category
     FROM
       excuses E
     INNER JOIN
       users U ON E.createdById = U.id
+    INNER JOIN
+      categories C ON E.categoryId = C.id
     WHERE
       E.id = ? AND E.deleted = 0`, [id],
   );
