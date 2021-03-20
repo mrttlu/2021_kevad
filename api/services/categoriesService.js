@@ -1,4 +1,3 @@
-const database = require('../../database');
 const db = require('../../db');
 
 const categoriesService = {};
@@ -35,31 +34,20 @@ categoriesService.getCategoryById = async (id) => {
 };
 
 // Creates new category
-categoriesService.createCategory = (newCategory) => {
-  const id = database.categories.length + 1;
-  const category = {
-    id,
-    ...newCategory,
-  };
-  database.categories.push(category);
-  return id;
+categoriesService.createCategory = async (newCategory) => {
+  const result = await db.query('INSERT INTO categories SET ?', [newCategory]);
+  return result.insertId;
 };
 
 // Deletes category
-categoriesService.deleteCategory = (id) => {
-  // Find category index
-  const index = database.categories.findIndex((element) => element.id === id);
-  // Remove category from 'database'
-  database.categories.splice(index, 1);
+categoriesService.deleteCategory = async (id) => {
+  await db.query('DELETE FROM categories WHERE id = ?', [id]);
   return true;
 };
 
 // Updates category
-categoriesService.updateCategory = (category) => {
-  // Find category index
-  const index = database.categories.findIndex((element) => element.id === category.id);
-  if (!category.description) return false;
-  database.categories[index].description = category.description;
+categoriesService.updateCategory = async (category) => {
+  await db.query('UPDATE categories SET description = ? WHERE id = ?', [category.description, category.id]);
   return true;
 };
 
