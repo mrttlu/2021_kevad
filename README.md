@@ -13,7 +13,7 @@
   * Kustutab määratud id-ga kommentaari
   ### Kasutajad:
 * GET /users
-  * Tagastab kasutajate nimekirja
+  * Tagastab kasutajate nimekirja (pead olema 'Admin' rollis)
 * GET /users/:id
   * Tagastab kasutaja määratud id-ga
 * POST /users
