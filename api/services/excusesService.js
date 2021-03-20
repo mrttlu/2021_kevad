@@ -1,96 +1,78 @@
-const database = require('../../database');
-const categoriesService = require('./categoriesService');
-const usersService = require('./usersService');
+const db = require('../../db');
 
 const excusesService = {};
 
 // Returns excuses
-excusesService.getExcuses = () => {
-  const { excuses } = database;
-  return excuses;
-};
-
-// Find excuse by id. Returns excuse if found or false.
-excusesService.getExcuseById = (id) => {
-  const excuse = database.excuses.find((element) => element.id === id);
-  if (!excuse) {
-    return false;
-  }
-  return excuse;
-};
-
-// Returns excuses with creator
-excusesService.getExcusesWithCreator = (excuses) => {
-  const excusesWithCreator = excuses.map((excuse) => {
-    const createdBy = usersService.getUserById(excuse.createdById);
-    return {
-      ...excuse,
-      createdBy,
-    };
-  });
-  return excusesWithCreator;
-};
-
-// Returns excuses with comments
-excusesService.getExcusesWithComments = (excuses) => {
-  const excusesWithComments = excuses.map((excuse) => {
-    const comments = database.comments.filter((comment) => comment.excuseId === excuse.id);
-    return {
-      ...excuse,
-      comments,
-    };
-  });
-  return excusesWithComments;
-};
-
-// Returns excuses with category
-excusesService.getExcusesWithCategory = (excuses) => {
-  const excusesWithCategory = excuses.map((excuse) => {
-    const category = categoriesService.getCategoryById(excuse.categoryId);
-    return {
-      ...excuse,
-      category,
-    };
-  });
-  return excusesWithCategory;
-};
-
-// Returns excuses in category specified by categoryId
-excusesService.getExcusesInCategory = (categoryId) => {
-  const excuses = database.excuses.filter(
-    (element) => element.categoryId === categoryId,
+excusesService.getExcuses = async () => {
+  const excuses = await db.query(
+    `SELECT
+      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email
+    FROM
+      excuses E
+    INNER JOIN
+      users U ON E.createdById = U.id
+    WHERE
+      E.deleted = 0`,
   );
   return excuses;
 };
 
+// Returns excuses in category specified by categoryId
+excusesService.getExcusesInCategory = async (categoryId) => {
+  const excuses = await db.query(
+    `SELECT
+      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email
+    FROM
+      excuses E
+    INNER JOIN
+      users U ON E.createdById = U.id
+    WHERE
+      E.deleted = 0 AND categoryId = ?`, [categoryId],
+  );
+  return excuses;
+};
+
+// Find excuse by id. Returns excuse if found or false.
+excusesService.getExcuseById = async (id) => {
+  const excuse = await db.query(
+    `SELECT
+      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email
+    FROM
+      excuses E
+    INNER JOIN
+      users U ON E.createdById = U.id
+    WHERE
+      E.id = ? AND E.deleted = 0`, [id],
+  );
+  if (!excuse) {
+    return false;
+  }
+  return excuse[0];
+};
+
 // Creates new excuse, returns id of created excuse
-excusesService.createExcuse = (newExcuse) => {
-  const id = database.excuses.length + 1;
-  const excuse = {
-    id,
-    ...newExcuse,
-  };
-  database.excuses.push(excuse);
+excusesService.createExcuse = async (newExcuse) => {
+  const result = await db.query('INSERT INTO excuses SET ?', [newExcuse]);
+  const id = result.insertId;
   return id;
 };
 
 // Deletes excuse specified by excuseId
-excusesService.deleteExcuse = (id) => {
-  // Find index
-  const index = database.excuses.findIndex((element) => element.id === id);
-  database.excuses.splice(index, 1);
+excusesService.deleteExcuse = async (id) => {
+  await db.query('UPDATE excuses SET deleted = 1 WHERE id = ?', [id]);
   return true;
 };
 
 // Updates excuse, returns true if successful
-excusesService.updateExcuse = (excuse) => {
-  const index = database.excuses.findIndex((element) => element.id === excuse.id);
+excusesService.updateExcuse = async (excuse) => {
+  const excuseToUpdate = {};
   if (excuse.description) {
-    database.excuses[index].description = excuse.description;
+    excuseToUpdate.description = excuse.description;
   }
   if (excuse.categoryId) {
-    database.excuses[index].categoryId = excuse.categoryId;
+    excuseToUpdate.categoryId = excuse.categoryId;
   }
+  await db.query('UPDATE excuses SET ? WHERE id = ?', [excuseToUpdate, excuse.id]);
   return true;
 };
 

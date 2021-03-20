@@ -37,7 +37,7 @@ usersService.createUser = async (newUser) => {
 
 // Deletes user
 usersService.deleteUser = async (id) => {
-  const result = await db.query('UPDATE users SET deleted = 1 WHERE id = ?', [id]);
+  await db.query('UPDATE users SET deleted = 1 WHERE id = ?', [id]);
   return true;
 };
 
@@ -57,7 +57,7 @@ usersService.updateUser = async (user) => {
     const hash = await hashService.hash(user.password);
     userToUpdate.password = hash;
   }
-  const result = await db.query('UPDATE users SET ? WHERE id = ?', [userToUpdate, user.id]);
+  await db.query('UPDATE users SET ? WHERE id = ?', [userToUpdate, user.id]);
   return true;
 };
 
