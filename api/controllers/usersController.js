@@ -9,8 +9,8 @@ const usersController = {};
  * Optional values: none
  * Success: status 200 - OK and list of users
  */
-usersController.getUsers = (req, res) => {
-  const users = usersService.getUsers();
+usersController.getUsers = async (req, res) => {
+  const users = await usersService.getUsers();
   return res.status(200).json({
     users,
   });
@@ -24,9 +24,9 @@ usersController.getUsers = (req, res) => {
  * Success: status 200 - OK and user with specified id
  * Error: status 400 - Bad Request and error message
  */
-usersController.getUserById = (req, res) => {
+usersController.getUserById = async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const user = usersService.getUserById(id);
+  const user = await usersService.getUserById(id);
   if (!user) {
     return res.status(400).json({
       error: `No user found with id: ${id}`,
@@ -114,16 +114,16 @@ usersController.login = async (req, res) => {
  * Error: status 400 - Bad Request and error message
  * Error: status 500 - Server error and error message
  */
-usersController.deleteUser = (req, res) => {
+usersController.deleteUser = async (req, res) => {
   const id = parseInt(req.params.id, 10);
   // Check if user exists
-  const user = usersService.getUserById(id);
+  const user = await usersService.getUserById(id);
   if (!user) {
     return res.status(400).json({
       error: `No user found with id: ${id}`,
     });
   }
-  const success = usersService.deleteUser(id);
+  const success = await usersService.deleteUser(id);
   if (!success) {
     return res.status(500).json({
       error: 'Something went wrong while deleting user',
@@ -154,7 +154,7 @@ usersController.updateUser = async (req, res) => {
       error: 'Id, firstName or lastName is missing',
     });
   }
-  const user = usersService.getUserById(id);
+  const user = await usersService.getUserById(id);
   if (!user) {
     res.status(400).json({
       error: `No user found with id: ${id}`,

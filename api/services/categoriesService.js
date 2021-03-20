@@ -1,16 +1,35 @@
 const database = require('../../database');
+const db = require('../../db');
 
 const categoriesService = {};
 
 // Returns list of categories
-categoriesService.getCategories = () => {
-  const { categories } = database;
+categoriesService.getCategories = async () => {
+  const categories = await db.query(
+    `SELECT
+      C.id, C.description, U.id AS createdById, U.firstName, U.lastName, U.email
+    FROM
+      categories C
+    INNER JOIN
+      users U ON C.createdById = U.id
+    WHERE
+    C.deleted = 0`,
+  );
   return categories;
 };
 
 // Find category by id. Returns category if found or false.
-categoriesService.getCategoryById = (id) => {
-  const category = database.categories.find((element) => element.id === id);
+categoriesService.getCategoryById = async (id) => {
+  const category = await db.query(
+    `SELECT
+      C.id, C.description, U.id AS createdById, U.firstName, U.lastName, U.email
+    FROM
+      categories C
+    INNER JOIN
+      users U ON C.createdById = U.id
+    WHERE
+    C.id = ? AND C.deleted = 0`, [id],
+  );
   if (!category) return false;
   return category;
 };

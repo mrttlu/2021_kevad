@@ -1,80 +1,76 @@
-const database = require('../../database');
 const jwtService = require('./jwtService');
 const hashService = require('./hashService');
+const db = require('../../db');
 
 const usersService = {};
 
 // Returns list of users
-usersService.getUsers = () => {
-  const { users } = database;
+usersService.getUsers = async () => {
+  const users = await db.query('SELECT id, firstName, lastName, email, role FROM users WHERE deleted = 0');
   return users;
 };
 
 // Find user by id. Returns user if found or false.
-usersService.getUserById = (id) => {
-  const user = database.users.find((element) => element.id === id);
-  if (!user) return false;
-  return user;
+usersService.getUserById = async (id) => {
+  const user = await db.query('SELECT id, firstName, lastName, email, role FROM users WHERE id = ? AND deleted = 0', [id]);
+  if (!user[0]) return false;
+  return user[0];
 };
 
 // Creates new user, returns id on new user
 usersService.createUser = async (newUser) => {
-  const existingUser = usersService.getUserByEmail(newUser.email);
+  const existingUser = await usersService.getUserByEmail(newUser.email);
   if (existingUser) {
     return { error: 'User already exists' };
   }
-  const id = database.users.length + 1;
   const hash = await hashService.hash(newUser.password);
   const user = {
-    id,
     firstName: newUser.firstName,
     lastName: newUser.lastName,
     email: newUser.email,
     password: hash,
     role: 'User',
   };
-  database.users.push(user);
-  return { id };
+  const result = await db.query('INSERT INTO users SET ?', [user]);
+  return { id: result.insertId };
 };
 
 // Deletes user
-usersService.deleteUser = (id) => {
-  // Find user index
-  const index = database.users.findIndex((element) => element.id === id);
-  // Remove user from 'database'
-  database.users.splice(index, 1);
+usersService.deleteUser = async (id) => {
+  const result = await db.query('UPDATE users SET deleted = 1 WHERE id = ?', [id]);
   return true;
 };
 
 // Updates user
 usersService.updateUser = async (user) => {
-  const index = database.users.findIndex((element) => element.id === user.id);
+  const userToUpdate = {};
   if (user.firstName) {
-    database.users[index].firstName = user.firstName;
+    userToUpdate.firstName = user.firstName;
   }
   if (user.lastName) {
-    database.users[index].lastName = user.lastName;
+    userToUpdate.lastName = user.lastName;
   }
   if (user.email) {
-    database.users[index].email = user.email;
+    userToUpdate.email = user.email;
   }
   if (user.password) {
     const hash = await hashService.hash(user.password);
-    database.users[index].password = hash;
+    userToUpdate.password = hash;
   }
+  const result = await db.query('UPDATE users SET ? WHERE id = ?', [userToUpdate, user.id]);
   return true;
 };
 
 // Find user by email. Returns user if found or undefined
-usersService.getUserByEmail = (email) => {
-  const user = database.users.find((element) => element.email === email);
-  return user;
+usersService.getUserByEmail = async (email) => {
+  const user = await db.query('SELECT * FROM users WHERE email = ? AND deleted = 0', [email]);
+  return user[0];
 };
 
 // User login
 usersService.login = async (login) => {
   const { email, password } = login;
-  const user = usersService.getUserByEmail(email);
+  const user = await usersService.getUserByEmail(email);
   if (!user) return { error: 'No user found' };
   const match = await hashService.compare(password, user.password);
   if (!match) return { error: 'Wrong password' };

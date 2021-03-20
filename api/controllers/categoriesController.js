@@ -9,8 +9,8 @@ const categoriesController = {};
  * Optional values: none
  * Success: status 200 - OK and list of categories
  */
-categoriesController.getCategories = (req, res) => {
-  const categories = categoriesService.getCategories();
+categoriesController.getCategories = async (req, res) => {
+  const categories = await categoriesService.getCategories();
   res.status(200).json({
     categories,
   });
@@ -24,9 +24,9 @@ categoriesController.getCategories = (req, res) => {
  * Success: status 200 - OK and category with specified id
  * Error: status 400 - Bad Request and error message
  */
-categoriesController.getCategoryById = (req, res) => {
+categoriesController.getCategoryById = async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const category = categoriesService.getCategoryById(id);
+  const category = await categoriesService.getCategoryById(id);
   if (category) {
     res.status(200).json({
       category,
@@ -46,7 +46,7 @@ categoriesController.getCategoryById = (req, res) => {
  * Success: status 201 - Created and id of created category
  * Error: status 400 - Bad Request and error message
  */
-categoriesController.createCategory = (req, res) => {
+categoriesController.createCategory = async (req, res) => {
   const { description } = req.body;
   const createdById = req.userId;
   if (!description) {
@@ -58,7 +58,7 @@ categoriesController.createCategory = (req, res) => {
     description,
     createdById,
   };
-  const id = categoriesService.createCategory(category);
+  const id = await categoriesService.createCategory(category);
   if (!id) {
     return res.status(500).json({
       error: 'Something went wrong while creating category',
@@ -77,16 +77,16 @@ categoriesController.createCategory = (req, res) => {
  * Success: status 204 - No Content
  * Error: status 400 - Bad Request and error message
  */
-categoriesController.deleteCategory = (req, res) => {
+categoriesController.deleteCategory = async (req, res) => {
   const id = parseInt(req.params.id, 10);
   // Check if category exists
-  const category = categoriesService.getCategoryById(id);
+  const category = await categoriesService.getCategoryById(id);
   if (!category) {
     return res.status(400).json({
       error: `No category found with id: ${id}`,
     });
   }
-  const success = categoriesService.deleteCategory(id);
+  const success = await categoriesService.deleteCategory(id);
   if (!success) {
     res.status(500).json({
       error: 'Something went wrong while deleting category',
@@ -103,7 +103,7 @@ categoriesController.deleteCategory = (req, res) => {
  * Success: status 200 - OK and success message
  * Error: status 400 - Bad Request and error message
  */
-categoriesController.updateCategory = (req, res) => {
+categoriesController.updateCategory = async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { description } = req.body;
   if (!description) {
@@ -111,7 +111,7 @@ categoriesController.updateCategory = (req, res) => {
       error: 'No description provided',
     });
   }
-  const category = categoriesService.getCategoryById(id);
+  const category = await categoriesService.getCategoryById(id);
   if (!category) {
     return res.status(400).json({
       error: `No category found with id: ${id}`,
@@ -121,7 +121,7 @@ categoriesController.updateCategory = (req, res) => {
     id,
     description,
   };
-  const success = categoriesService.updateCategory(categoryToUpdate);
+  const success = await categoriesService.updateCategory(categoryToUpdate);
   if (!success) {
     return res.status(500).json({
       error: 'Something went wrong while updating category',
