@@ -2,6 +2,20 @@ const db = require('../../db');
 
 const categoriesService = {};
 
+const formatOutput = async (results) => {
+  const formatted = await results.map((category) => ({
+    id: category.id,
+    description: category.description,
+    createdBy: {
+      id: category.createdById,
+      firstName: category.firstName,
+      lastName: category.lastName,
+      email: category.email,
+    },
+  }));
+  return formatted;
+};
+
 // Returns list of categories
 categoriesService.getCategories = async () => {
   const categories = await db.query(
@@ -14,7 +28,8 @@ categoriesService.getCategories = async () => {
     WHERE
     C.deleted = 0`,
   );
-  return categories;
+  const formattedOutput = await formatOutput(categories);
+  return formattedOutput;
 };
 
 // Find category by id. Returns category if found or false.
@@ -30,7 +45,8 @@ categoriesService.getCategoryById = async (id) => {
     C.id = ? AND C.deleted = 0`, [id],
   );
   if (!category) return false;
-  return category;
+  const formattedOutput = await formatOutput(category);
+  return formattedOutput[0];
 };
 
 // Creates new category
