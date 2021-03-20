@@ -24,7 +24,9 @@ const formatOutput = async (results) => {
 excusesService.getExcuses = async () => {
   const excuses = await db.query(
     `SELECT
-      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS categoryDescription
+      E.id, E.description, E.categoryId,
+      U.id AS createdById, U.firstName, U.lastName, U.email,
+      C.id AS categoryId, C.description AS categoryDescription
     FROM
       excuses E
     INNER JOIN
