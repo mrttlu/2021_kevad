@@ -2,11 +2,29 @@ const db = require('../../db');
 
 const excusesService = {};
 
+const formatOutput = async (results) => {
+  const formatted = await results.map((excuse) => ({
+    id: excuse.id,
+    description: excuse.description,
+    createdBy: {
+      id: excuse.createdById,
+      firstName: excuse.firstName,
+      lastName: excuse.lastName,
+      email: excuse.email,
+    },
+    category: {
+      id: excuse.categoryId,
+      description: excuse.categoryDescription,
+    },
+  }));
+  return formatted;
+};
+
 // Returns excuses
 excusesService.getExcuses = async () => {
   const excuses = await db.query(
     `SELECT
-      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS category
+      E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS categoryDescription
     FROM
       excuses E
     INNER JOIN
@@ -16,14 +34,15 @@ excusesService.getExcuses = async () => {
     WHERE
       E.deleted = 0`,
   );
-  return excuses;
+  const formattedOutput = await formatOutput(excuses);
+  return formattedOutput;
 };
 
 // Returns excuses in category specified by categoryId
 excusesService.getExcusesInCategory = async (categoryId) => {
   const excuses = await db.query(
     `SELECT
-    E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS category
+    E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS categoryDescription
     FROM
       excuses E
     INNER JOIN
@@ -33,14 +52,15 @@ excusesService.getExcusesInCategory = async (categoryId) => {
     WHERE
       E.deleted = 0 AND categoryId = ?`, [categoryId],
   );
-  return excuses;
+  const formattedOutput = await formatOutput(excuses);
+  return formattedOutput;
 };
 
 // Find excuse by id. Returns excuse if found or false.
 excusesService.getExcuseById = async (id) => {
   const excuse = await db.query(
     `SELECT
-    E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS category
+    E.id, E.description, E.categoryId, U.id AS createdById, U.firstName, U.lastName, U.email, C.id AS categoryId, C.description AS categoryDescription
     FROM
       excuses E
     INNER JOIN
@@ -53,7 +73,8 @@ excusesService.getExcuseById = async (id) => {
   if (!excuse) {
     return false;
   }
-  return excuse[0];
+  const formattedOutput = await formatOutput(excuse);
+  return formattedOutput[0];
 };
 
 // Creates new excuse, returns id of created excuse
