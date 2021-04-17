@@ -63,7 +63,7 @@ usersService.updateUser = async (user) => {
 
 // Find user by email. Returns user if found or undefined
 usersService.getUserByEmail = async (email) => {
-  const user = await db.query('SELECT * FROM users WHERE email = ? AND deleted = 0', [email]);
+  const user = await db.query('SELECT id, email, password, role FROM users WHERE email = ? AND deleted = 0', [email]);
   return user[0];
 };
 
